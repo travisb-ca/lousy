@@ -18,6 +18,7 @@
 import unittest
 import argparse
 import sys
+import os
 import pprint
 
 class LousyTestCase(unittest.TestCase):
@@ -92,6 +93,10 @@ if __name__ == '__main__':
 	run_cmd.add_argument('-s', '--slow', action='store_true', help='Run the slow tests')
 	run_cmd.add_argument('-C', '--constrained', action='store_true', help='Run the constrained tests')
 	run_cmd.set_defaults(func=cmd_run)
+
+	# Make it possible for tests to import modules from their parent tests directory
+	test_path = os.getcwd() + '/tests'
+	sys.path.append(test_path)
 
 	args = parser.parse_args()
 	result = args.func(args)
