@@ -1,0 +1,33 @@
+Lousy - Test Run Integration with Bug Trackers
+
+Lousy is a test runner built upon the Python unittest module which provides
+integration between the test system and the project bug tracker. Lousy provides
+this integration primarily through a system where the test logs are checked by a
+list of regular expressions for the cause of the failure and matching bug. The
+bug is updated when such a failure occurs.
+
+
+Test Organization
+======================
+
+Lousy divides tests into four categories of tests:
+- unit
+- component
+- slow
+- constrained
+
+Unit tests are fine grained tests intended to test a single function, method or
+class.
+
+Component tests are coarser tests intended to test entire subsystems or
+executables.
+
+Slow tests are a category to place tests which take a significant amount of time
+to run. This might include fuzzing tests or tests which need slow preparations
+before running.
+
+Constrained tests are those tests which cannot be arbitrarily run in parallel.
+This might be a test which consumes a large amount of memory, requires some
+external hardware or have some other constraint which requires that only one or
+a small number of such tests be run at once in any particular environment or
+office.
