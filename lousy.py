@@ -23,6 +23,9 @@ import pprint
 class LousyTestCase(unittest.TestCase):
 	pass
 
+# Dirty hack to give the user tests access to LousyTestCase
+__builtins__.LousyTestCase = LousyTestCase
+
 def cmd_list(args):
 	def list_tests(test_root, test_root_name):
 		for test_file in test_root:
