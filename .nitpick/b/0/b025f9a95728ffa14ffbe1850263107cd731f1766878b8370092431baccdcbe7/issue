@@ -1,0 +1,18 @@
+Component: UI
+Date: 2013-11-17 20:47:16
+Depends_On: 
+Duplicate_Of: 
+Fix_By: 1.0
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Minor
+State: Open
+Title: Allow Filtering by Glob
+Type: Feature
+Units_of_Work: 1000
+--
+It is often useful to be able to run/list tests filtered by a glob. unittest makes this easy so it should be supported by lousy.
