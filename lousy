@@ -42,8 +42,38 @@ def cmd_list(args):
 	return True
 
 def cmd_run(args):
-	# run tests
-	print 'Not implemented'
+	if args.all:
+		args.unit = True
+		args.component = True
+		args.slow = True
+		args.constrained = True
+
+	tests = unittest.TestSuite()
+
+	if args.unit:
+		unittests = unittest.defaultTestLoader.discover('tests/unit', pattern='*.py', top_level_dir='tests/unit')
+		tests.addTest(unittests)
+	
+	if args.component:
+		componenttests = unittest.defaultTestLoader.discover('tests/component', pattern='*.py', top_level_dir='tests/component')
+		tests.addTest(componenttests)
+	
+	if args.slow:
+		slowtests = unittest.defaultTestLoader.discover('tests/slow', pattern='*.py', top_level_dir='tests/slow')
+		tests.addTest(slowtests)
+	
+	if args.constrained:
+		constrainedtests = unittest.defaultTestLoader.discover('tests/constrained', pattern='*.py', top_level_dir='tests/constrained')
+		tests.addTest(constrainedtests)
+
+	results = unittest.TestResult()
+
+	tests.run(results)
+
+	print '%d tests failed' % len(results.failures)
+	print '%d total tests run' % results.testsRun
+
+	return True
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(prog='lousy', description='Test Runner with Bug Tracker Integration')
