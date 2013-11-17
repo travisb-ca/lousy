@@ -1,0 +1,18 @@
+Component: Test_Runner
+Date: 2013-11-17 19:28:27
+Depends_On: 
+Duplicate_Of: 
+Fix_By: 1.0
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Major
+State: Open
+Title: Parallel Testing
+Type: Feature
+Units_of_Work: 1000
+--
+Fast running tests should be able to be run in parallel to take advantage of all the CPUs available. of course there needs to be an option or environment variable to reduce the parallelism if requested.

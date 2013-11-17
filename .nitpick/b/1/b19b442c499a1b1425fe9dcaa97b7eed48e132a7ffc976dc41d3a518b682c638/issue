@@ -1,0 +1,20 @@
+Component: Test_Runner
+Date: 2013-11-17 19:34:31
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Eventually
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Major
+State: Open
+Title: Test Rerun Determination
+Type: Feature
+Units_of_Work: 1000
+--
+A common problem with projects which have extensive tests is that running all the tests starts to consume too much time. One way to deal with this is to provide an option to only run the tests which need to be run based on the code which it depends on having changed.
+
+The naive way to do this is per line, but that likely requires too large a database without tight VCS integration. Per function/class test determination granularity is likely sufficient and a much smaller database.

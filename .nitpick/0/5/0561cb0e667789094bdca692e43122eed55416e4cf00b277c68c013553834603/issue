@@ -1,0 +1,18 @@
+Component: Integration
+Date: 2013-11-17 19:30:47
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Critical
+State: Open
+Title: Integrate with Nitpick
+Type: Feature
+Units_of_Work: 1000
+--
+One of the key features of lousy is integration into a bug tracker to automatically update and semi-automatically open new bugs based on test failures. The first bug tracker which needs such integration is Nitpick.

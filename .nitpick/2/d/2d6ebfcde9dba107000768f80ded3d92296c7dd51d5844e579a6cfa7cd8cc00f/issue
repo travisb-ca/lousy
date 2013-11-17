@@ -1,0 +1,18 @@
+Component: Test_Runner
+Date: 2013-11-17 19:32:06
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Critical
+State: Open
+Title: Regex based bug determination
+Type: Feature
+Units_of_Work: 1000
+--
+A key feature of lousy is taking the output of a test run and running a series of regexes against it to determine what bug a particular test failure falls under. It also provides a tool to go through the logs of new failures and add new regexes based upon the failures. These regexes can either be added to new bugs or to existing bugs if a new failure case is found.
