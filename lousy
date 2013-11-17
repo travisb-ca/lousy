@@ -66,13 +66,8 @@ def cmd_run(args):
 		constrainedtests = unittest.defaultTestLoader.discover('tests/constrained', pattern='*.py', top_level_dir='tests/constrained')
 		tests.addTest(constrainedtests)
 
-	results = unittest.TestResult()
-
-	tests.run(results)
-
-	print '%d tests failed' % len(results.failures)
-	print '%d total tests run' % results.testsRun
-	print '%d tests skipped' % len(results.skipped)
+	runner = unittest.TextTestRunner(verbosity=2)
+	runner.run(tests)
 
 	return True
 
