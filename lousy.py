@@ -54,6 +54,10 @@ def cmd_run(args):
 		args.slow = True
 		args.constrained = True
 
+	if not args.unit and not args.component and not args.slow and not args.constrained:
+		print 'No tests selected to run'
+		return True
+
 	tests = unittest.TestSuite()
 
 	if args.unit:
