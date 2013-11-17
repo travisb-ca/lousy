@@ -6,6 +6,9 @@ this integration primarily through a system where the test logs are checked by a
 list of regular expressions for the cause of the failure and matching bug. The
 bug is updated when such a failure occurs.
 
+The Lousy bug tracker can be found in the source and at
+http://travisbrown.ca/projects/lousy/issues/index.html
+
 
 Test Organization
 ======================
