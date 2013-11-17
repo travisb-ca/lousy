@@ -72,6 +72,7 @@ def cmd_run(args):
 
 	print '%d tests failed' % len(results.failures)
 	print '%d total tests run' % results.testsRun
+	print '%d tests skipped' % len(results.skipped)
 
 	return True
 
