@@ -48,15 +48,12 @@ def cmd_list(args):
 	return True
 
 def cmd_run(args):
-	if args.all:
+	if not args.unit and not args.component and not args.slow and not args.constrained:
+		# Default to running all the tests
 		args.unit = True
 		args.component = True
 		args.slow = True
 		args.constrained = True
-
-	if not args.unit and not args.component and not args.slow and not args.constrained:
-		print 'No tests selected to run'
-		return True
 
 	tests = unittest.TestSuite()
 
@@ -76,6 +73,10 @@ def cmd_run(args):
 		constrainedtests = unittest.defaultTestLoader.discover('tests/constrained', pattern='*.py', top_level_dir='tests/constrained')
 		tests.addTest(constrainedtests)
 
+	if tests.countTestCases() == 0:
+		print 'No tests selected to run'
+		return True
+
 	runner = unittest.TextTestRunner(verbosity=2)
 	runner.run(tests)
 
@@ -88,12 +89,11 @@ if __name__ == '__main__':
 	list_cmd = subcmds.add_parser('list', help='List all tests')
 	list_cmd.set_defaults(func=cmd_list)
 
-	run_cmd = subcmds.add_parser('run', help='Run tests')
+	run_cmd = subcmds.add_parser('run', help='Run tests, defaults to all tests')
 	run_cmd.add_argument('-u', '--unit', action='store_true', help='Run the unit tests')
 	run_cmd.add_argument('-c', '--component', action='store_true', help='Run the component tests')
 	run_cmd.add_argument('-s', '--slow', action='store_true', help='Run the slow tests')
 	run_cmd.add_argument('-C', '--constrained', action='store_true', help='Run the constrained tests')
-	run_cmd.add_argument('-a', '--all', action='store_true', help='Run all tests')
 	run_cmd.set_defaults(func=cmd_run)
 
 	args = parser.parse_args()
