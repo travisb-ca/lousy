@@ -18,10 +18,31 @@
 import unittest
 import argparse
 import sys
+import pprint
 
 def cmd_list(args):
 	# List all the available tests
-	print 'Not implemented'
+	loader = unittest.TestLoader()
+
+	def list_tests(test_root, test_root_name):
+		for test_file in test_root:
+			for test_class in test_file:
+				for test in test_class:
+					print '%s/%s' % (test_root_name, test.id())
+
+	unit_tests = loader.discover('tests/unit', pattern='*.py', top_level_dir='tests/unit')
+	list_tests(unit_tests, 'unit')
+
+	component_tests = loader.discover('tests/component', pattern='*.py', top_level_dir='tests/component')
+	list_tests(component_tests, 'component')
+
+	slow_tests = loader.discover('tests/slow', pattern='*.py', top_level_dir='tests/slow')
+	list_tests(slow_tests, 'slow')
+
+	constrained_tests = loader.discover('tests/constrained', pattern='*.py', top_level_dir='tests/constrained')
+	list_tests(constrained_tests, 'constrained')
+
+	return True
 
 def cmd_run(args):
 	# run tests
