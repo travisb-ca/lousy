@@ -1,0 +1,18 @@
+Component: Test_Runner
+Date: 2013-11-17 20:11:33
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Minor
+State: Open
+Title: Replay Random Seeds
+Type: Feature
+Units_of_Work: 1000
+--
+Many tests require random numbers in order to effectively test. Normal runs will need random seeds to get good test coverage, but it must be possible to reproduce such a run. As such logs need to save the root random seed and provide some easy way of reusing that seed for debugging.

@@ -1,0 +1,18 @@
+Component: Test_Runner
+Date: 2013-11-17 20:14:12
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Blocker
+State: Open
+Title: Stub Protocol
+Type: Feature
+Units_of_Work: 1000
+--
+Mocking out classes and functions is a necessary part of successfully unit testing. Lousy is a test runner and provides some helper functionality so it should also provide some helpers for mocking. Lousy is language agnostic for the code being tested so it can't provide direct mocking support itself. It can, however, provide an easy stub protocol to connect simple tested-language stubs to the python language tests.
