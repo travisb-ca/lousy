@@ -20,8 +20,88 @@
 	<h1>Table of Contents</h1>
 	<ul>
 		<li><a href="#what_is_lousy">What is Lousy?</a></li>
+		<li><a href="#invoking_lousy">Invoking Lousy</a></li>
+		<li><a href="#lousy_tests">Lousy Tests</a></li> <ul>
+			<li><a href="#types_of_tests">Types of Tests</a></li>
+			<li><a href="#test_organization">Test Organization</a></li>
+			<li><a href="#basic_test_api">Basic Test API</a></li>
+		</ul>
 	</ul>
 
 	<a name="what_is_lousy"></a><a href="#what_is_lousy"><h1>What is Lousy?</h1></a>
 	<p>
+	Lousy is a test framework and test runner built upon Python's unittest module. It is useful
+	for any language and provides several useful facilities not present in most test frameworks.
+	The most notable of these is the bug tracker integration. When using a supported bug tracker
+	Lousy is able to update bugs in that tracker with test failures and create new bugs based
+	upon previously unrecorded test failures. More than just the testname which failed, Lousy
+	will match the output of the test against a set of regexes to determine more accurately
+	which bug matches the particular failure or warning.
+	</p>
+
+	<a name="invoking_lousy"></a><a href="#invoking_lousy"><h1>Invoking Lousy</h1></a>
+	<p>
+	</p>
+
+	<a name="lousy_tests"></a><a href="#lousy_tests"><h1>Lousy Tests</h1></a>
+	<p>
+	This section will tell you all you need to begin writing simple tests with Lousy. More
+	complex portions of the Lousy test API will be described in later sections.
+	</p>
+
+	<a name="types_of_tests"></a><a href="#types_of_tests"><h1>Types of Tests</h1></a>
+	<p>
+	Lousy makes the distinction between three classes of tests: unit tests, component tests,
+	slow tests and constrained tests. Unit tests are intended to test a single class or
+	function, using stubs to stand in for the rest of the application. Component tests are
+	intended to test larger unit, often a subsystem or executable. Slow tests are defined by the
+	length of time it takes to run the tests. Slow tests obviously take what would otherwise be
+	an annoying length of time to run. Constrained tests are tests which have some special
+	requirements such as extreme amounts of memory or some hardware. Constrained tests are tests
+	which can not, generally, be run in parallel.
+	</p>
+
+	<p>
+	The only reason for this distinction is to make it easy to filter which type of test to run
+	at a particular time. For example, if you want your tests to complete quickly you might only
+	run the unit and component tests. If you have more patience but no special resources then
+	you might run the slow tests as well but not the constrained tests. The constrained tests
+	you would only run when you have the necessary resources available. Lousy will run unit
+	tests, component tests and slow tests in parallel to complete testing more quickly, but
+	won't run constrained tests in parallel. Constrained tests can optionally be run only if the
+	constraints are met.
+	</p>
+
+	<a name="test_organization"></a><a href="#test_organization"><h1>Test Organization</h1></a>
+	<p>
+	Lousy has a simple directory structure to store the tests. There is the top level directory
+	for tests which must be named <tt>tests</tt>. Beneath that there is one directory for each
+	type of test: <tt>unit</tt>, <tt>component</tt>, <tt>slow</tt>, <tt>constrained</tt>. All of
+	these directories must exist for Lousy to run correctly. Lousy should be run in the parent
+	directory of the <tt>tests</tt>.
+	</p>
+
+	<p>
+	When run Lousy will traverse into the tests directory to enumerate and run the tests of the
+	type selected. Lousy configures the Python interpreter such that from those test files you
+	can import any module in the <tt>tests</tt> directory with a simple import. This is
+	especially useful if you have some project specific utility classes or functions you wish to
+	use in your tests.
+	</p>
+
+	<p>
+	Within each of those test files there are one or more TestCase classes. These are classes
+	which inherit from lousy.LousyTestCase and contain the setup and teardown for all the tests
+	within that class. Tests within those classes must start with <i>test</i> in their name and
+	take no extra arguments. For more details about the contents of the various TestCase methods
+	see the next section on the basic API.
+	</p>
+
+	<a name="basic_test_api"></a><a href="#basic_test_api"><h1>Basic Test API</h1></a>
+	<p>
+	Lousy is built on top of the Python unittest module. Until this section is written more
+	fully you should look at the <a href="http://docs.python.org/2/library/unittest.html">Python
+		unittest documentation</a>. The most important differences is that you should import
+	lousy and not unittest and your test case classes should inherit from lousy.LousyTestCase
+	instead of unittest.TestCase.
 	</p>
