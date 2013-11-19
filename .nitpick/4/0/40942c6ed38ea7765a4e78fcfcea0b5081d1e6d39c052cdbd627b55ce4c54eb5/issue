@@ -1,0 +1,18 @@
+Component: UI
+Date: 2013-11-19 21:06:03
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Minor
+State: Open
+Title: Failure investigation
+Type: Feature
+Units_of_Work: 1000
+--
+Once the user has a database of test failures and bugs it might be helpful to have a tool which can query the database and help drill down the failures based on things like branch, bug number, date, etc.
