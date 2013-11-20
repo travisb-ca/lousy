@@ -21,7 +21,7 @@ import sys
 import os
 import pprint
 
-class LousyTestCase(unittest.TestCase):
+class TestCase(unittest.TestCase):
 	pass
 
 def cmd_list(args):
