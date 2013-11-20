@@ -91,7 +91,7 @@
 
 	<p>
 	Within each of those test files there are one or more TestCase classes. These are classes
-	which inherit from lousy.LousyTestCase and contain the setup and teardown for all the tests
+	which inherit from lousy.TestCase and contain the setup and teardown for all the tests
 	within that class. Tests within those classes must start with <i>test</i> in their name and
 	take no extra arguments. For more details about the contents of the various TestCase methods
 	see the next section on the basic API.
@@ -102,6 +102,6 @@
 	Lousy is built on top of the Python unittest module. Until this section is written more
 	fully you should look at the <a href="http://docs.python.org/2/library/unittest.html">Python
 		unittest documentation</a>. The most important differences is that you should import
-	lousy and not unittest and your test case classes should inherit from lousy.LousyTestCase
+	lousy and not unittest and your test case classes should inherit from lousy.TestCase
 	instead of unittest.TestCase.
 	</p>
