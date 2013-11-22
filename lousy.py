@@ -19,7 +19,90 @@ import unittest
 import argparse
 import sys
 import os
+import subprocess
+import time
+import fcntl
 import pprint
+
+class ProcessPipe(object):
+	'''File object to interact with processes.
+	   Any output from the process will be output with a prefix and stored until
+	   queried by the test.
+	   '''
+
+	prefix = ''
+	closed = False
+
+	def __init__(self):
+		self.pipes = os.pipe()
+		self._setCloseExec(self.pipes[0])
+		self._setCloseExec(self.pipes[1])
+
+	def setPrefix(self, prefix):
+		self.prefix = prefix
+
+	def fileno(self):
+		return self.pipes[self._direction]
+
+	def _setCloseExec(self, fd):
+		flags = fcntl.fcntl(fd, fcntl.F_GETFD)
+		fcntl.fcntl(fd, fcntl.F_SETFD, flags | fcntl.FD_CLOEXEC)
+
+class InProcessPipe(ProcessPipe):
+	'''ProcessPipe which represents stdin'''
+	_direction = 0
+	_fileno = 1
+
+class OutProcessPipe(ProcessPipe):
+	'''ProcessPipe which respresnts stdout or stderr'''
+	_direction = 1
+	_fileno = 0
+
+class Process(object):
+	'''Class for interacting with processes'''
+
+	def __init__(self, command, shell=False):
+		'''command is the command, with arguments, to run as the process
+		   shell is True if the command should be run in the shell and False otherwise.'''
+
+		self.stdin = InProcessPipe()
+		self.stdout = OutProcessPipe()
+		self.stderr = OutProcessPipe()
+		self.returncode = None
+		self.running = False
+
+		self.process = subprocess.Popen(command, shell=shell, stdin=self.stdin, stdout=self.stdout,
+				                stderr=self.stderr)
+
+		self.running = True
+
+		cmd_name = command.split(' ')[0]
+		prefix = '[ %s(%d) ] received: ' % (cmd_name, self.process.pid)
+
+		self.stdin.setPrefix(prefix)
+		self.stdout.setPrefix(prefix)
+		self.stderr.setPrefix(prefix)
+
+	def terminate(self):
+		'''Forcefully terminate the child process if it hasn't already terminated'''
+		if self.running:
+			self.process.kill()
+			self.returncode = self.process.returncode
+
+	def waitForTermination(self, timeout=5):
+		'''Wait until the timeout for the child to terminate gracefully.
+		   Returns True if the child gracefully terminated before the timeout, False otherwise.'''
+		if not self.running:
+			return True
+
+		startTime = time.time()
+		while not self.process.poll():
+			if time.time() - startTime > timeout:
+				return False
+			time.sleep(0.001)
+		self.running = False
+		self.returncode = self.process.returncode
+		return True
 
 class TestCase(unittest.TestCase):
 	pass
