@@ -22,6 +22,7 @@ import os
 import subprocess
 import time
 import fcntl
+import errno
 import pprint
 
 class ProcessPipe(object):
@@ -37,6 +38,7 @@ class ProcessPipe(object):
 		self.pipes = os.pipe()
 		self._setCloseExec(self.pipes[0])
 		self._setCloseExec(self.pipes[1])
+		self._setNonBlocking(self.pipes[self._fileno])
 
 	def setPrefix(self, prefix):
 		self.prefix = prefix
@@ -47,6 +49,29 @@ class ProcessPipe(object):
 	def _setCloseExec(self, fd):
 		flags = fcntl.fcntl(fd, fcntl.F_GETFD)
 		fcntl.fcntl(fd, fcntl.F_SETFD, flags | fcntl.FD_CLOEXEC)
+
+	def _setNonBlocking(self, fd):
+		flags = fcntl.fcntl(fd, fcntl.F_GETFL)
+		fcntl.fcntl(fd, fcntl.F_SETFL, flags | os.O_NONBLOCK)
+
+	def write(self, string):
+		'''Returns number of bytes successfully written'''
+		print '%s sent: %s' % (self.prefix, string)
+		return os.write(self.pipes[self._fileno], string)
+
+	def read(self):
+		'''Return a string of all the available output. An empty string is returned at the end of the file'''
+		try:
+			output = os.read(self.pipes[self._fileno], 102400)
+			if len(output) > 0:
+				print '%s recieved: %s' % (self.prefix, output)
+
+			return output
+		except OSError as e:
+			if e.errno == errno.EAGAIN or e.errno == errno.EWOULDBLOCK:
+				return ''
+
+			raise e
 
 class InProcessPipe(ProcessPipe):
 	'''ProcessPipe which represents stdin'''
