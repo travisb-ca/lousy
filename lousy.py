@@ -24,63 +24,63 @@ import pprint
 class TestCase(unittest.TestCase):
 	pass
 
-def cmd_list(args):
-	def list_tests(test_root, test_root_name):
-		for test_file in test_root:
-			for test_class in test_file:
-				for test in test_class:
-					print '%s/%s' % (test_root_name, test.id())
+if __name__ == '__main__':
+	def cmd_list(args):
+		def list_tests(test_root, test_root_name):
+			for test_file in test_root:
+				for test_class in test_file:
+					for test in test_class:
+						print '%s/%s' % (test_root_name, test.id())
 
-	unit_tests = unittest.defaultTestLoader.discover('tests/unit', pattern='*.py', top_level_dir='tests/unit')
-	list_tests(unit_tests, 'unit')
+		unit_tests = unittest.defaultTestLoader.discover('tests/unit', pattern='*.py', top_level_dir='tests/unit')
+		list_tests(unit_tests, 'unit')
 
-	component_tests = unittest.defaultTestLoader.discover('tests/component', pattern='*.py', top_level_dir='tests/component')
-	list_tests(component_tests, 'component')
+		component_tests = unittest.defaultTestLoader.discover('tests/component', pattern='*.py', top_level_dir='tests/component')
+		list_tests(component_tests, 'component')
 
-	slow_tests = unittest.defaultTestLoader.discover('tests/slow', pattern='*.py', top_level_dir='tests/slow')
-	list_tests(slow_tests, 'slow')
+		slow_tests = unittest.defaultTestLoader.discover('tests/slow', pattern='*.py', top_level_dir='tests/slow')
+		list_tests(slow_tests, 'slow')
 
-	constrained_tests = unittest.defaultTestLoader.discover('tests/constrained', pattern='*.py', top_level_dir='tests/constrained')
-	list_tests(constrained_tests, 'constrained')
+		constrained_tests = unittest.defaultTestLoader.discover('tests/constrained', pattern='*.py', top_level_dir='tests/constrained')
+		list_tests(constrained_tests, 'constrained')
 
-	return True
-
-def cmd_run(args):
-	if not args.unit and not args.component and not args.slow and not args.constrained:
-		# Default to running all the tests
-		args.unit = True
-		args.component = True
-		args.slow = True
-		args.constrained = True
-
-	tests = unittest.TestSuite()
-
-	if args.unit:
-		unittests = unittest.defaultTestLoader.discover('tests/unit', pattern='*.py', top_level_dir='tests/unit')
-		tests.addTest(unittests)
-	
-	if args.component:
-		componenttests = unittest.defaultTestLoader.discover('tests/component', pattern='*.py', top_level_dir='tests/component')
-		tests.addTest(componenttests)
-	
-	if args.slow:
-		slowtests = unittest.defaultTestLoader.discover('tests/slow', pattern='*.py', top_level_dir='tests/slow')
-		tests.addTest(slowtests)
-	
-	if args.constrained:
-		constrainedtests = unittest.defaultTestLoader.discover('tests/constrained', pattern='*.py', top_level_dir='tests/constrained')
-		tests.addTest(constrainedtests)
-
-	if tests.countTestCases() == 0:
-		print 'No tests selected to run'
 		return True
 
-	runner = unittest.TextTestRunner(verbosity=2)
-	runner.run(tests)
+	def cmd_run(args):
+		if not args.unit and not args.component and not args.slow and not args.constrained:
+			# Default to running all the tests
+			args.unit = True
+			args.component = True
+			args.slow = True
+			args.constrained = True
 
-	return True
+		tests = unittest.TestSuite()
 
-if __name__ == '__main__':
+		if args.unit:
+			unittests = unittest.defaultTestLoader.discover('tests/unit', pattern='*.py', top_level_dir='tests/unit')
+			tests.addTest(unittests)
+		
+		if args.component:
+			componenttests = unittest.defaultTestLoader.discover('tests/component', pattern='*.py', top_level_dir='tests/component')
+			tests.addTest(componenttests)
+		
+		if args.slow:
+			slowtests = unittest.defaultTestLoader.discover('tests/slow', pattern='*.py', top_level_dir='tests/slow')
+			tests.addTest(slowtests)
+		
+		if args.constrained:
+			constrainedtests = unittest.defaultTestLoader.discover('tests/constrained', pattern='*.py', top_level_dir='tests/constrained')
+			tests.addTest(constrainedtests)
+
+		if tests.countTestCases() == 0:
+			print 'No tests selected to run'
+			return True
+
+		runner = unittest.TextTestRunner(verbosity=2)
+		runner.run(tests)
+
+		return True
+
 	parser = argparse.ArgumentParser(prog='lousy', description='Test Runner with Bug Tracker Integration')
 	subcmds = parser.add_subparsers(help='command help')
 
