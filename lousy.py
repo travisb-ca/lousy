@@ -55,14 +55,22 @@ class ProcessPipe(object):
 
 	def write(self, string):
 		'''Returns number of bytes successfully written'''
-		print '%s sent: %s' % (self.prefix, string)
+		lines = string.split('\n')
+		for line in lines[:-1]:
+			print '%s sent: "%s\\n"' % (self.prefix, line)
+		if lines[-1] != '':
+			print '%s sent: "%s"' % (self.prefix, lines[-1])
 		return os.write(self.pipes[self._fileno], string)
 
 	def read(self):
 		'''Return a string of all the available output. An empty string is returned at the end of the file'''
 		output = os.read(self.pipes[self._fileno], 102400)
 		if len(output) > 0:
-			print '%s received: "%s"\n' % (self.prefix, output)
+			lines = output.split('\n')
+			for line in lines[:-1]:
+				print '%s received: "%s\\n"' % (self.prefix, line)
+			if lines[-1] != '':
+				print '%s received: "%s"' % (self.prefix, lines[-1])
 
 		return output
 
