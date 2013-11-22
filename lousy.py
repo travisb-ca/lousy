@@ -103,7 +103,7 @@ class Process(object):
 		self.running = True
 
 		cmd_name = command.split(' ')[0]
-		prefix = '[ %s(%d) ] ' % (cmd_name, self.process.pid)
+		prefix = '[ %s(%d) ]' % (cmd_name, self.process.pid)
 
 		self.stdin.setPrefix(prefix)
 		self.stdout.setPrefix(prefix)
