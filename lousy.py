@@ -53,9 +53,24 @@ class ProcessPipe(object):
 		flags = fcntl.fcntl(fd, fcntl.F_GETFL)
 		fcntl.fcntl(fd, fcntl.F_SETFL, flags | os.O_NONBLOCK)
 
+	def escapeAscii(self, string):
+		'''Given an ascii string escape all non-printable characters to be printable'''
+
+		# encoding doesn't work for \t \n and \r so we must do it ourselves
+		def escape_whitespace(character):
+			if character == '\t':
+				return '\\t'
+			elif character == '\r':
+				return '\\r'
+			else:
+				return character
+
+		string = ''.join(map(escape_whitespace, string))
+		return string.encode('unicode_escape')
+
 	def write(self, string):
 		'''Returns number of bytes successfully written'''
-		lines = string.split('\n')
+		lines = self.escapeAscii(string).split('\n')
 		for line in lines[:-1]:
 			print '%s sent: "%s\\n"' % (self.prefix, line)
 		if lines[-1] != '':
@@ -66,7 +81,7 @@ class ProcessPipe(object):
 		'''Return a string of all the available output. An empty string is returned at the end of the file'''
 		output = os.read(self.pipes[self._fileno], 102400)
 		if len(output) > 0:
-			lines = output.split('\n')
+			lines = self.escapeAscii(output).split('\n')
 			for line in lines[:-1]:
 				print '%s received: "%s\\n"' % (self.prefix, line)
 			if lines[-1] != '':
