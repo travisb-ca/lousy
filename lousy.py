@@ -62,8 +62,6 @@ class ProcessPipe(object):
 		def escape_whitespace(character):
 			if character == '\t':
 				return '\\t'
-			elif character == '\r':
-				return '\\r'
 			else:
 				return character
 
