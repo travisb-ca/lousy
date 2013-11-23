@@ -23,6 +23,7 @@ import subprocess
 import time
 import fcntl
 import errno
+import select
 import pprint
 
 class ProcessPipe(object):
@@ -78,7 +79,12 @@ class ProcessPipe(object):
 		return os.write(self.pipes[self._fileno], string)
 
 	def read(self):
-		'''Return a string of all the available output. An empty string is returned at the end of the file'''
+		'''Return a string of all the available output. An empty string is returned when no output is available'''
+
+		ready, _, _ = select.select([self.pipes[self._fileno]], [], [], 0)
+		if len(ready) == 0:
+			return ''
+
 		output = os.read(self.pipes[self._fileno], 102400)
 		if len(output) > 0:
 			lines = self.escapeAscii(output).split('\\n')
@@ -164,6 +170,11 @@ class Process(object):
 		self.running = False
 		self.returncode = self.process.returncode
 		return True
+
+	def flushOutput(self):
+		'''Wait until al the output from the process has been read and then return'''
+		while self.stdout.read() != '':
+			pass
 
 class TestCase(unittest.TestCase):
 	pass
