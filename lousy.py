@@ -99,16 +99,36 @@ class OutProcessPipe(ProcessPipe):
 	_direction = 1
 	_fileno = 0
 
+class PtyProcessPipe(ProcessPipe):
+	'''ProcessPipe which uses a pty to connect to the child instead of regular pipes.
+	   This is useful for interactive processes.
+	'''
+
+	_direction = 1
+	_fileno = 0
+
+	def __init__(self):
+		self.pipes = os.openpty()
+		self._setCloseExec(self.pipes[0])
+
 class Process(object):
 	'''Class for interacting with processes'''
 
-	def __init__(self, command, shell=False):
+	def __init__(self, command, shell=False, pty=False):
 		'''command is the command, with arguments, to run as the process
-		   shell is True if the command should be run in the shell and False otherwise.'''
+		   shell is True if the command should be run in the shell and False otherwise.
+		   pty is whether to use a pty or a normal pipe to communicate with the process.
+		'''
 
-		self.stdin = InProcessPipe()
-		self.stdout = OutProcessPipe()
-		self.stderr = OutProcessPipe()
+		if pty:
+			self.stdin = PtyProcessPipe()
+			self.stdout = self.stdin
+			self.stderr = self.stdin
+		else:
+			self.stdin = InProcessPipe()
+			self.stdout = OutProcessPipe()
+			self.stderr = OutProcessPipe()
+
 		self.returncode = None
 		self.running = False
 
