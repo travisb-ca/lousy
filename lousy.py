@@ -137,7 +137,7 @@ class Process(object):
 			return True
 
 		startTime = time.time()
-		while not self.process.poll():
+		while self.process.poll() is None:
 			if time.time() - startTime > timeout:
 				return False
 			time.sleep(0.001)
