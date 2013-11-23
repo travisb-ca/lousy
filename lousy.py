@@ -81,7 +81,7 @@ class ProcessPipe(object):
 		'''Return a string of all the available output. An empty string is returned at the end of the file'''
 		output = os.read(self.pipes[self._fileno], 102400)
 		if len(output) > 0:
-			lines = self.escapeAscii(output).split('\n')
+			lines = self.escapeAscii(output).split('\\n')
 			for line in lines[:-1]:
 				print '%s received: "%s\\n"' % (self.prefix, line)
 			if lines[-1] != '':
