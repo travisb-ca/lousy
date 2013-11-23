@@ -24,6 +24,7 @@ import time
 import fcntl
 import errno
 import select
+import re
 import pprint
 
 class ProcessPipe(object):
@@ -183,6 +184,21 @@ class Process(object):
 	def sendLine(self, line):
 		'''Send a string to the process, adds a terminating newline'''
 		self.send(line + '\n')
+
+	def expect(self, regexes, timeout=5):
+		'''Waits for one of the expected regexes to match or the timeout to expire.
+		   Returns an index into the regexes sequence on success. Returns -1 on timeout.
+		   If multiple matches are found then the first one in regexes is returned.
+		'''
+		startTime = time.time()
+		output = self.stdout.read()
+
+		while time.time() - startTime < timeout:
+			for line in output.split('\n'):
+				for i in range(len(regexes)):
+					if re.match(regexes[i], line) is not None:
+						return i
+		return -1
 
 class TestCase(unittest.TestCase):
 	pass
