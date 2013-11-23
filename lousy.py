@@ -176,6 +176,14 @@ class Process(object):
 		while self.stdout.read() != '':
 			pass
 
+	def send(self, text):
+		'''Send the given characters to the process with no interpretation'''
+		self.stdin.write(text)
+
+	def sendLine(self, line):
+		'''Send a string to the process, adds a terminating newline'''
+		self.send(line + '\n')
+
 class TestCase(unittest.TestCase):
 	pass
 
