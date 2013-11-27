@@ -1,0 +1,18 @@
+Component: Test_Runner
+Date: 2013-11-27 04:46:05
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Major
+State: Open
+Title: Per test timing
+Type: Feature
+Units_of_Work: 1000
+--
+Though we already get a total time taken for all the tests, that doesn't help you find the slow tests. Add timings on a per-test basis to provide this information.
