@@ -153,6 +153,7 @@ class Process(object):
 		'''Forcefully terminate the child process if it hasn't already terminated'''
 		if self.running:
 			self.process.kill()
+			self.waitForTermination()
 			self.returncode = self.process.returncode
 
 	def waitForTermination(self, timeout=5):
@@ -166,6 +167,7 @@ class Process(object):
 			if time.time() - startTime > timeout:
 				return False
 			time.sleep(0.001)
+			self.flushOutput()
 		self.running = False
 		self.returncode = self.process.returncode
 		return True
