@@ -80,7 +80,7 @@ class ProcessPipe(object):
 	def read(self):
 		'''Return a string of all the available output. An empty string is returned when no output is available'''
 
-		ready, _, _ = select.select([self.pipes[self._fileno]], [], [], 0)
+		ready, _, _ = select.select([self.pipes[self._fileno]], [], [], 0.1)
 		if len(ready) == 0:
 			return ''
 
@@ -166,7 +166,7 @@ class Process(object):
 		while self.process.poll() is None:
 			if time.time() - startTime > timeout:
 				return False
-			time.sleep(0.001)
+			time.sleep(0.1)
 			self.flushOutput()
 		self.running = False
 		self.returncode = self.process.returncode
