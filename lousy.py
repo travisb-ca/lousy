@@ -94,6 +94,13 @@ class ProcessPipe(object):
 
 		return output
 
+	def readSimple(self):
+		'''Returns a string of all the available output. An empty string is returned when no output is available.
+		Returns a string with carriage returns removed.
+		'''
+		output = self.read()
+		return output.translate(None, '\r')
+
 class InProcessPipe(ProcessPipe):
 	'''ProcessPipe which represents stdin'''
 	_direction = 0
@@ -191,9 +198,9 @@ class Process(object):
 		   If multiple matches are found then the first one in regexes is returned.
 		'''
 		startTime = time.time()
-		output = self.stdout.read()
 
 		while time.time() - startTime < timeout:
+			output = self.stdout.readSimple()
 			for line in output.split('\n'):
 				for i in range(len(regexes)):
 					if re.match(regexes[i], line) is not None:
