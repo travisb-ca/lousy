@@ -201,7 +201,49 @@ class Process(object):
 		return -1
 
 class TestCase(unittest.TestCase):
-	pass
+	def setUp(self):
+		self.setUp2()
+		self.setUp1()
+
+	def setUp1(self):
+		'''setUp method for the bottom level test class to use. This should be implemented in the test case class
+		   instead of putting the setup into the setUp() method as one would in unittest.
+
+		   This method is guarranteed to run upon success of the utility class setup in setUp2().
+		'''
+		pass
+
+	def setUp2(self):
+		'''setUp method for the middle level test utility class to use. This should be implemented in the utility class
+		   instead of putting the setup into the setUp() method as one would in unittest.
+
+		   This method is guarranteed to run before the test setup in setUp1(). If this method fails the test will not be run.
+		'''
+		pass
+
+	def tearDown(self):
+		try:
+			self.tearDown1()
+		except Exception as e:
+			self.tearDown2()
+			raise e
+		self.tearDown2()
+
+	def tearDown1(self):
+		'''tearDown method for the bottom level test class to use. This should be implemented in the test case class
+		   instead of putting the teardown into the tearDown() method as one would in unittest.
+
+		   This method is guarranteed to run before the utility class teardown in tearDown2().
+		'''
+		pass
+
+	def tearDown2(self):
+		'''tearDown method for the middle level test utility class to use. This should be implemented in the utility class
+		   instead of putting the tearDown into the tearDown() method as one would in unittest.
+
+		   This method is guarranteed to run after the test teardown in tearDown1(), even if tearDown1() fails.
+		'''
+		pass
 
 if __name__ == '__main__':
 	def cmd_list(args):
