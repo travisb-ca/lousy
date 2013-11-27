@@ -1,0 +1,8 @@
+Attachment: 
+Attachment-filename: 
+Attachment-type: application/octet-stream
+Date: 2013-11-27 04:50:58
+Parent: issue
+User: travisb@travisbrown.ca
+--
+It would also be useful if the timings could include how long the various setUp() methods and tearDown() methods take to run as well.
