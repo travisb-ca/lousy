@@ -35,6 +35,7 @@ class ProcessPipe(object):
 
 	prefix = ''
 	closed = False
+	read_leftovers = ''
 
 	def __init__(self):
 		self.pipes = os.pipe()
@@ -95,10 +96,20 @@ class ProcessPipe(object):
 		return output
 
 	def readSimple(self):
-		'''Returns a string of all the available output. An empty string is returned when no output is available.
-		Returns a string with carriage returns removed.
+		'''Returns a string of all the available output in simplified
+		form. An empty string is returned when no output is available.
+		Returns a string with:
+			- carriage returns removed.
+			- Only full lines
 		'''
 		output = self.read()
+		lines = output.split('\n')
+		if len(lines) > 1:
+			output = self.read_leftovers + '\n'.join(lines[:-1])
+			self.read_leftovers = lines[-1]
+		else:
+			self.read_leftovers += lines[0]
+
 		return output.translate(None, '\r')
 
 class InProcessPipe(ProcessPipe):
