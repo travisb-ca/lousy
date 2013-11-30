@@ -103,12 +103,13 @@ class ProcessPipe(object):
 			- Only full lines
 		'''
 		output = self.read()
-		lines = output.split('\n')
-		if len(lines) > 1:
+		if '\n' in output:
+			lines = output.split('\n')
 			output = self.read_leftovers + '\n'.join(lines[:-1])
 			self.read_leftovers = lines[-1]
 		else:
-			self.read_leftovers += lines[0]
+			self.read_leftovers += output
+			return ''
 
 		return output.translate(None, '\r')
 
