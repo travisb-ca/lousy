@@ -237,7 +237,7 @@ class Process(object):
 
 	def _checkRegexes(self, regexes, line):
 		for i in range(len(regexes)):
-			if _debug:
+			if _debug and line != '':
 				print 'checking "%s" against "%s"' % (regexes[i], line)
 			if re.match(regexes[i], line) is not None:
 				return i
