@@ -27,6 +27,12 @@ import select
 import re
 import pprint
 
+# A hack to allow us to pass the debug setting from lousy as a script to lousy as a library
+try:
+	_debug = unittest._lousy_debug
+except:
+	pass
+
 class ProcessPipe(object):
 	'''File object to interact with processes.
 	   Any output from the process will be output with a prefix and stored until
@@ -215,6 +221,8 @@ class Process(object):
 			output = self.stdout.readSimple()
 			for line in output.split('\n'):
 				for i in range(len(regexes)):
+					if _debug:
+						print 'checking "%s" against "%s"' % (regexes[i], line)
 					if re.match(regexes[i], line) is not None:
 						return i
 		return -1
@@ -294,6 +302,8 @@ if __name__ == '__main__':
 			args.slow = True
 			args.constrained = True
 
+		unittest._lousy_debug = args.debug
+
 		tests = unittest.TestSuite()
 
 		if args.unit:
@@ -332,6 +342,7 @@ if __name__ == '__main__':
 	run_cmd.add_argument('-c', '--component', action='store_true', help='Run the component tests')
 	run_cmd.add_argument('-s', '--slow', action='store_true', help='Run the slow tests')
 	run_cmd.add_argument('-C', '--constrained', action='store_true', help='Run the constrained tests')
+	run_cmd.add_argument('-d', '--debug', action='store_true', help='Output debug logging while running tests')
 	run_cmd.set_defaults(func=cmd_run)
 
 	# Make it possible for tests to import modules from their parent tests directory
