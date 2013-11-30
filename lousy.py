@@ -210,6 +210,14 @@ class Process(object):
 		'''Send a string to the process, adds a terminating newline'''
 		self.send(line + '\n')
 
+	def _checkRegexes(self, regexes, line):
+		for i in range(len(regexes)):
+			if _debug:
+				print 'checking "%s" against "%s"' % (regexes[i], line)
+			if re.match(regexes[i], line) is not None:
+				return i
+		return -1
+
 	def expect(self, regexes, timeout=5):
 		'''Waits for one of the expected regexes to match or the timeout to expire.
 		   Returns an index into the regexes sequence on success. Returns -1 on timeout.
@@ -220,11 +228,29 @@ class Process(object):
 		while time.time() - startTime < timeout:
 			output = self.stdout.readSimple()
 			for line in output.split('\n'):
-				for i in range(len(regexes)):
-					if _debug:
-						print 'checking "%s" against "%s"' % (regexes[i], line)
-					if re.match(regexes[i], line) is not None:
-						return i
+				match = self._checkRegexes(regexes, line)
+				if match != -1:
+					return match
+		return -1
+
+        def expectPrompt(self, regexes, timeout=5):
+		'''Waits for the expected regex to match or the timeout to
+		   expire. The regex will only be matched against the final
+		   partial line of the output receieved to date.
+		   Returns an index into the regexes sequence on success. Returns -1 on timeout.
+		'''
+		startTime = time.time()
+                output = self.stdout.read()
+
+                while time.time() - startTime < timeout:
+                        out = self.stdout.read()
+                        if out == '':
+				line = output.rsplit('\n', 1)[-1]
+				match = self._checkRegexes(regexes, line)
+				if match != -1:
+					return match
+                        
+                        output += out
 		return -1
 
 class TestCase(unittest.TestCase):
