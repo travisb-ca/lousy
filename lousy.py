@@ -170,9 +170,12 @@ class Process(object):
 	'''Class for interacting with processes'''
 
 	def __init__(self, command, shell=False, pty=False):
-		'''command is the command, with arguments, to run as the process
+		'''command a list of the command and then arguments to run as the process
 		   shell is True if the command should be run in the shell and False otherwise.
 		   pty is whether to use a pty or a normal pipe to communicate with the process.
+
+		   If shell is True then the command list is converted into a space separate string
+		   to be interpretted by the shell.
 		'''
 
 		if pty:
@@ -187,13 +190,16 @@ class Process(object):
 		self.returncode = None
 		self.running = False
 
-		self.process = subprocess.Popen(command, shell=shell, stdin=self.stdin, stdout=self.stdout,
+		if shell:
+			cmd = ' '.join(command)
+		else:
+			cmd = command
+		self.process = subprocess.Popen(cmd, shell=shell, stdin=self.stdin, stdout=self.stdout,
 				                stderr=self.stderr)
 
 		self.running = True
 
-		cmd_name = command.split(' ')[0]
-		prefix = '[ %s(%d) ]' % (cmd_name, self.process.pid)
+		prefix = '[ %s(%d) ]' % (command[0], self.process.pid)
 
 		self.stdin.setPrefix(prefix)
 		self.stdout.setPrefix(prefix)
