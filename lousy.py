@@ -259,7 +259,7 @@ class Process(object):
 				return match
 		return -1
 
-        def expectPrompt(self, regexes, timeout=5):
+	def expectPrompt(self, regexes, timeout=5):
 		'''Waits for the expected regex to match or the timeout to
 		   expire. The regex will only be matched against the final
 		   partial line of the output receieved to date.
@@ -267,14 +267,14 @@ class Process(object):
 		'''
 		startTime = time.time()
 
-                while time.time() - startTime < timeout:
-                        line = self.stdout.readSimple(fullLineOnly=False)
+		while time.time() - startTime < timeout:
+			line = self.stdout.readSimple(fullLineOnly=False)
 			if line is None:
 				continue # No output this time, wait for next time
 			match = self._checkRegexes(regexes, line)
 			if match != -1:
 				return match
-                        
+
 		return -1
 
 class TestCase(unittest.TestCase):
