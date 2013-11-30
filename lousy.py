@@ -41,7 +41,7 @@ class ProcessPipe(object):
 
 	prefix = ''
 	closed = False
-	read_leftovers = ''
+	buffer = ''
 
 	def __init__(self):
 		self.pipes = os.pipe()
@@ -87,9 +87,17 @@ class ProcessPipe(object):
 	def read(self):
 		'''Return a string of all the available output. An empty string is returned when no output is available'''
 
-		ready, _, _ = select.select([self.pipes[self._fileno]], [], [], 0.1)
+		# If we have data in our buffer then we shouldn't wait to read more data
+		if len(self.buffer) > 0:
+			timeout = 0.0
+		else:
+			timeout = 0.1
+
+		ready, _, _ = select.select([self.pipes[self._fileno]], [], [], timeout)
 		if len(ready) == 0:
-			return ''
+			output = self.buffer
+			self.buffer = ''
+			return output
 
 		output = os.read(self.pipes[self._fileno], 102400)
 		if len(output) > 0:
@@ -99,22 +107,39 @@ class ProcessPipe(object):
 			if lines[-1] != '':
 				print '%s received: "%s"' % (self.prefix, lines[-1])
 
+		output = self.buffer + output
+		self.buffer = ''
+
 		return output
 
-	def readSimple(self):
+	def readLine(self, fullLineOnly=True):
+		'''Return a string with the next available line of output from
+		   the process. The trailing newline is trimmed.
+		   None is returned when no line is available.
+		   fullLineOnly=False will return a partial line if it is next in the queue.
+		'''
+		self.buffer = self.read()
+
+		if '\n' in self.buffer:
+			output, self.buffer = self.buffer.split('\n', 1)
+			return output
+
+		if not fullLineOnly and len(self.buffer) > 0:
+			output = self.buffer
+			self.buffer = ''
+			return output
+
+		return None
+
+	def readSimple(self, fullLineOnly=True):
 		'''Returns a string of all the available output in simplified
 		form. An empty string is returned when no output is available.
 		Returns a string with:
 			- carriage returns removed.
 			- Only full lines
 		'''
-		output = self.read()
-		if '\n' in output:
-			lines = output.split('\n')
-			output = self.read_leftovers + '\n'.join(lines[:-1])
-			self.read_leftovers = lines[-1]
-		else:
-			self.read_leftovers += output
+		output = self.readLine(fullLineOnly=fullLineOnly)
+		if output is None:
 			return ''
 
 		return output.translate(None, '\r')
@@ -226,11 +251,12 @@ class Process(object):
 		startTime = time.time()
 
 		while time.time() - startTime < timeout:
-			output = self.stdout.readSimple()
-			for line in output.split('\n'):
-				match = self._checkRegexes(regexes, line)
-				if match != -1:
-					return match
+			line = self.stdout.readSimple()
+			if line is None:
+				continue # No output this time, wait for next time
+			match = self._checkRegexes(regexes, line)
+			if match != -1:
+				return match
 		return -1
 
         def expectPrompt(self, regexes, timeout=5):
@@ -240,17 +266,15 @@ class Process(object):
 		   Returns an index into the regexes sequence on success. Returns -1 on timeout.
 		'''
 		startTime = time.time()
-                output = self.stdout.read()
 
                 while time.time() - startTime < timeout:
-                        out = self.stdout.read()
-                        if out == '':
-				line = output.rsplit('\n', 1)[-1]
-				match = self._checkRegexes(regexes, line)
-				if match != -1:
-					return match
+                        line = self.stdout.readSimple(fullLineOnly=False)
+			if line is None:
+				continue # No output this time, wait for next time
+			match = self._checkRegexes(regexes, line)
+			if match != -1:
+				return match
                         
-                        output += out
 		return -1
 
 class TestCase(unittest.TestCase):
