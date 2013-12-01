@@ -1,4 +1,4 @@
-components: Documentation Test_Runner Integration UI
+components: Documentation Test_Runner Integration UI Analyzer
 fix_by: Next_Release Eventually 1.0
 priority: 1 2 3 4 5
 project_name: Lousy
