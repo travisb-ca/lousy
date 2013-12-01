@@ -1,0 +1,24 @@
+Component: Analyzer
+Date: 2013-12-01 19:17:25
+Depends_On: 
+Duplicate_Of: 
+Fix_By: 1.0
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Major
+State: Open
+Title: Distributed (Partial?) Testrun Database
+Type: Feature
+Units_of_Work: 1000
+--
+In order to analyze test failures we'd need to have a database of failures to begin with. Now this must be a distributed database because anybody with a checkout could run the tests and often the tests need to be run on different machines to test different OSes. How should this be designed?
+
+It should be possible to store the database inside the VCS, but that can't be required since it will grow quickly and not always provide useful knowledge. Nobody really cars what test runs happened three years ago for example.
+
+Consequently we'd need some way to truncate the database by time.
+
+The test run information and the log files would obviously have to be separated since they'll be huge and varied. That means that the log file names will have to be unique and human locatable across machines.
