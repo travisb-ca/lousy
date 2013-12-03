@@ -287,6 +287,7 @@ class TestCase(unittest.TestCase):
 	def setUp(self):
 		self.setUp2()
 		self.setUp1()
+		self.timing.setUp()
 
 	def setUp1(self):
 		'''setUp method for the bottom level test class to use. This should be implemented in the test case class
@@ -305,6 +306,7 @@ class TestCase(unittest.TestCase):
 		pass
 
 	def tearDown(self):
+		self.timing.tearDown()
 		try:
 			self.tearDown1()
 		except Exception as e:
@@ -329,6 +331,62 @@ class TestCase(unittest.TestCase):
 		pass
 
 if __name__ == '__main__':
+	class TestTiming(object):
+		start = 0
+		setup = 0
+		teardown = 0
+		end = 0
+
+		def __init__(self):
+			self.start = time.time()
+
+		def setUp(self):
+			self.setup = time.time()
+
+		def tearDown(self):
+			self.teardown = time.time()
+
+		def stop(self):
+			self.end = time.time()
+
+		def totalTime(self):
+			return self.end - self.start
+
+		def setupTime(self):
+			return self.setup - self.start
+
+		def tearDownTime(self):
+			return self.end - self.teardown
+
+		def testTime(self):
+			return self.teardown - self.setup
+
+	class TestResult(unittest.TestResult):
+		succesNum = 0
+		failureNum = 0
+		errorNum = 0
+		timings = {}
+
+		def __init__(self):
+			unittest.TestResult.__init__(self, sys.stdout, True, 2)
+
+		def startTest(self, test):
+			timing = TestTiming()
+			self.timings[test.id()] = timing
+			test.timing = timing
+			unittest.TestResult.startTest(self, test)
+
+		def stopTest(self, test):
+			test.timing.stop()
+			print 'test took %f (%f/%f/%f) seconds' % (test.timing.totalTime(),
+					test.timing.setupTime(), test.timing.testTime(),
+					test.timing.tearDownTime())
+			unittest.TestResult.stopTest(self, test)
+
+	class TestRunner(unittest.TextTestRunner):
+		def _makeResult(self):
+			return TestResult()
+
 	def cmd_list(args):
 		def list_tests(test_root, test_root_name):
 			for test_file in test_root:
@@ -382,7 +440,7 @@ if __name__ == '__main__':
 			print 'No tests selected to run'
 			return True
 
-		runner = unittest.TextTestRunner(verbosity=2)
+		runner = TestRunner()
 		runner.run(tests)
 
 		return True
