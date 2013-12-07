@@ -25,6 +25,7 @@ import fcntl
 import errno
 import select
 import re
+import collections
 import pprint
 
 # A hack to allow us to pass the debug setting from lousy as a script to lousy as a library
@@ -32,6 +33,72 @@ try:
 	_debug = unittest._lousy_debug
 except:
 	pass
+
+class EmulatedTerminal(object):
+	'''Base class for all the emulated terminals'''
+
+	class FrameBufferCell(object):
+		'''Class which tracks the value and attributes of a character cell in the
+		   framebuffer.
+		'''
+		char = ''
+		attributes = 0
+
+		# Various bit-flag attributes
+		fl_set = (1 << 0) # This cell has a valid value
+
+		def __init__(self):
+			pass
+
+	def _newEmptyFrameBufferCell():
+		return FrameBufferCell()
+
+	framebuffer = collections.defaultdict(_newEmptyFrameBufferCell)
+
+	rows = 24
+	cols = 80
+	current_row = 0
+	current_col = 0
+
+	def __init__(self):
+		pass
+
+	def interpret(self, c):
+		'''Take the given character and interpret it'''
+		pass
+
+class VT100(EmulatedTerminal):
+	'''VT100 terminal emulator'''
+
+	def __init__(self):
+		EmulatedTerminal.__init__(self)
+
+class Vtty(object):
+	'''Vtty is a terminal emulator which interprets the output of a process and keeps a
+	   virtual framebuffer which can be examined to confirm process output.
+	'''
+
+	emulation = None
+
+	def __init__(self, emulation='vt100'):
+		'''emulation is the terminal emulator featureset and control codes to emulate.
+		   Valid values are:
+		   vt100
+		'''
+		if emulation is True:
+			emulation = 'vt100'
+
+		if emulation == 'vt100':
+			self.emulation = VT100()
+		else:
+			raise ValueError('%s is not a supported terminal emulation type' % emulation)
+
+	def append(self, input):
+		'''Interpret the given stream of bytes to make their modification to the current
+		   state of the virtual terminal.
+		'''
+		for c in intput:
+			emulation.interpret(c)
 
 class ProcessPipe(object):
 	'''File object to interact with processes.
@@ -42,6 +109,7 @@ class ProcessPipe(object):
 	prefix = ''
 	closed = False
 	buffer = ''
+	mirror = None
 
 	def __init__(self):
 		self.pipes = os.pipe()
@@ -50,6 +118,12 @@ class ProcessPipe(object):
 
 	def setPrefix(self, prefix):
 		self.prefix = prefix
+
+	def setMirror(self, newMirror):
+		'''A mirror is an object which the ProcessPipe calls obj.append() on with the
+		   newly read data. Useful for alternative interpretations of the output.
+		'''
+		self.mirror = newMirror
 
 	def fileno(self):
 		return self.pipes[self._direction]
@@ -100,6 +174,10 @@ class ProcessPipe(object):
 			return output
 
 		output = os.read(self.pipes[self._fileno], 102400)
+
+		if self.mirror is not None:
+			self.mirror.append(output)
+
 		if len(output) > 0:
 			lines = self.escapeAscii(output).split('\\n')
 			for line in lines[:-1]:
@@ -173,6 +251,16 @@ class Process(object):
 		'''command a list of the command and then arguments to run as the process
 		   shell is True if the command should be run in the shell and False otherwise.
 		   pty is whether to use a pty or a normal pipe to communicate with the process.
+		   If pty is not false true there are two ways to access the output of the process.
+		   Using the process.read*() methods will return a line based representation of what
+		   the process output. Using the process.vty object (an instance of the Vtty class)
+		   it is possible to see an interpretted view as a virtual terminal might show the
+		   output.
+
+		   Valid values for pty:
+		     False - Don't start process in pty
+		     True  - Start process in pty using default terminal emulation
+		     vt100 - Start process in pty using vt100 emulation
 
 		   If shell is True then the command list is converted into a space separate string
 		   to be interpretted by the shell.
