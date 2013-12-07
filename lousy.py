@@ -237,6 +237,27 @@ class Process(object):
 		'''Send the given characters to the process with no interpretation'''
 		self.stdin.write(text)
 
+	def read(self):
+		'''Return a string of all the available output. An empty string is returned when no output is available'''
+		self.stdout.read()
+
+	def readLine(self, fullLineOnly=True):
+		'''Return a string with the next available line of output from
+		   the process. The trailing newline is trimmed.
+		   None is returned when no line is available.
+		   fullLineOnly=False will return a partial line if it is next in the queue.
+		'''
+		return self.stdout.readLine(fullLineOnly)
+
+	def readSimple(self, fullLineOnly=True):
+		'''Returns a string of all the available output in simplified
+		form. An empty string is returned when no output is available.
+		Returns a string with:
+			- carriage returns removed.
+			- Only full lines
+		'''
+		return self.stdout.readSimple(fullLineOnly)
+
 	def sendLine(self, line):
 		'''Send a string to the process, adds a terminating newline'''
 		self.send(line + '\n')
