@@ -1,0 +1,18 @@
+Component: Analyzer
+Date: 2013-12-09 23:41:07
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Eventually
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Minor
+State: New
+Title: Statistics Help confirming fixes
+Type: Feature
+Units_of_Work: 1000
+--
+Since Lousy will have so much of the test data it might be in a good position to apply statistics to determine if a randomly occurring bug is likely fixed or not. See http://lpenz.org/articles/bugprobhunt/ as an example of some of the statistics which could be performed to help with this.
