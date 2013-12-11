@@ -3,7 +3,8 @@
 import lousy
 
 class TerminalTestCase(lousy.TestCase):
-	def assertCellChar(self, cell, char):
+	def assertCellChar(self, row, col, char):
+		cell = self.vty.cell(row, col)
 		self.assertIsNotNone(cell)
 		self.assertEqual(cell.char, char)
 
@@ -17,28 +18,22 @@ class EmulatedTerminalTests(TerminalTestCase):
 
 	def test_basicEcho(self):
 		self.vty.interpret('a')
-		cell = self.vty.cell(0, 0)
-		self.assertCellChar(cell, 'a')
+		self.assertCellChar(0, 0, 'a')
 
 		self.vty.interpret('s')
-		cell = self.vty.cell(0, 1)
-		self.assertCellChar(cell, 's')
+		self.assertCellChar(0, 1, 's')
 
 		self.vty.interpret('d')
-		cell = self.vty.cell(0, 2)
-		self.assertCellChar(cell, 'd')
+		self.assertCellChar(0, 2, 'd')
 
 		self.vty.interpret('f')
-		cell = self.vty.cell(0, 3)
-		self.assertCellChar(cell, 'f')
+		self.assertCellChar(0, 3, 'f')
 
 	def test_echoWrapAround(self):
 		for i in range(self.vty.cols):
 			self.vty.interpret('a')
 
-		cell = self.vty.cell(1, 0)
-		self.assertCellChar(cell, '')
+		self.assertCellChar(1, 0, '')
 
 		self.vty.interpret('b')
-		cell = self.vty.cell(1, 0)
-		self.assertCellChar(cell, 'b')
+		self.assertCellChar(1, 0, 'b')
