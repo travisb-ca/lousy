@@ -508,7 +508,7 @@ if __name__ == '__main__':
 			self.stream.flush()
 
 		def testDescription(self, test):
-			desc = test.shortDescription()
+			desc = test.id()
 			return desc
 
 		def startTest(self, test):
