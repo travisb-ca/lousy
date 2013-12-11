@@ -63,9 +63,29 @@ class EmulatedTerminal(object):
 	def __init__(self):
 		pass
 
+	def getCell(self, row, col):
+		'''Retreive the FrameBufferCell for the given location. Returns None if the cell is out of range.
+		'''
+		if row < 0 or row >= self.rows:
+			return None
+		if col < 0 or col >= self.cols:
+			return None
+
+		return framebuffer[(row, col)]
+
 	def interpret(self, c):
 		'''Take the given character and interpret it'''
-		pass
+		cell = self.format[(self.current_row, self.current_col)]
+		cell.char = c
+
+		self.current_col += 1
+		if self.current_col == self.cols:
+			self.current_col = 0
+			self.current_row += 1
+
+			if self.current_row == self.rows:
+				# TODO Handle scrolling
+				pass
 
 class VT100(EmulatedTerminal):
 	'''VT100 terminal emulator'''
