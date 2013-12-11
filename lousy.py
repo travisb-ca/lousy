@@ -51,7 +51,7 @@ class EmulatedTerminal(object):
 			pass
 
 	def _newEmptyFrameBufferCell():
-		return FrameBufferCell()
+		return EmulatedTerminal.FrameBufferCell()
 
 	framebuffer = collections.defaultdict(_newEmptyFrameBufferCell)
 
@@ -71,11 +71,11 @@ class EmulatedTerminal(object):
 		if col < 0 or col >= self.cols:
 			return None
 
-		return framebuffer[(row, col)]
+		return self.framebuffer[(row, col)]
 
 	def interpret(self, c):
 		'''Take the given character and interpret it'''
-		cell = self.format[(self.current_row, self.current_col)]
+		cell = self.framebuffer[(self.current_row, self.current_col)]
 		cell.char = c
 
 		self.current_col += 1
