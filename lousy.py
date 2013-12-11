@@ -63,7 +63,7 @@ class EmulatedTerminal(object):
 	def __init__(self):
 		pass
 
-	def getCell(self, row, col):
+	def cell(self, row, col):
 		'''Retreive the FrameBufferCell for the given location. Returns None if the cell is out of range.
 		'''
 		if row < 0 or row >= self.rows:
