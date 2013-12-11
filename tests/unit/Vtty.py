@@ -45,3 +45,12 @@ class EmulatedTerminalTests(TerminalTestCase):
 
 		self.assertCellChar(0, 0, '1')
 		self.assertCellChar(1, 1, '2')
+
+	def test_echoCarriageReturn(self):
+		self.vty.interpret('1')
+		self.vty.interpret('2')
+		self.vty.interpret('\r')
+		self.vty.interpret('3')
+
+		self.assertCellChar(0, 0, '3')
+		self.assertCellChar(0, 1, '2')

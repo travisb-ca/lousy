@@ -79,6 +79,8 @@ class EmulatedTerminal(object):
 
 		if c == '\n':
 			self.current_row += 1
+		elif c == '\r':
+			self.current_col = 0
 		else:
 			cell.char = c
 			self.current_col += 1
