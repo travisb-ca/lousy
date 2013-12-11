@@ -37,3 +37,11 @@ class EmulatedTerminalTests(TerminalTestCase):
 
 		self.vty.interpret('b')
 		self.assertCellChar(1, 0, 'b')
+
+	def test_echoNewLine(self):
+		self.vty.interpret('1')
+		self.vty.interpret('\n')
+		self.vty.interpret('2')
+
+		self.assertCellChar(0, 0, '1')
+		self.assertCellChar(1, 1, '2')

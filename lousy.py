@@ -75,10 +75,14 @@ class EmulatedTerminal(object):
 
 	def interpret(self, c):
 		'''Take the given character and interpret it'''
-		cell = self.framebuffer[(self.current_row, self.current_col)]
-		cell.char = c
+		cell = self.cell(self.current_row, self.current_col)
 
-		self.current_col += 1
+		if c == '\n':
+			self.current_row += 1
+		else:
+			cell.char = c
+			self.current_col += 1
+
 		if self.current_col == self.cols:
 			self.current_col = 0
 			self.current_row += 1
