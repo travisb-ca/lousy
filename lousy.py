@@ -499,11 +499,27 @@ if __name__ == '__main__':
 		def __init__(self):
 			unittest.TestResult.__init__(self, sys.stdout, True, 2)
 
+			self.stream = sys.stdout
+
+		def output(self, string, newline=True):
+			self.stream.write(string)
+			if newline:
+				self.stream.write('\n')
+			self.stream.flush()
+
+		def testDescription(self, test):
+			desc = test.shortDescription()
+			return desc
+
 		def startTest(self, test):
 			timing = TestTiming()
 			self.timings[test.id()] = timing
 			test.timing = timing
+
 			unittest.TestResult.startTest(self, test)
+
+			s = '%s...' % self.testDescription(test)
+			self.output(s)
 
 		def stopTest(self, test):
 			test.timing.stop()
@@ -511,6 +527,41 @@ if __name__ == '__main__':
 					test.timing.setupTime(), test.timing.testTime(),
 					test.timing.tearDownTime())
 			unittest.TestResult.stopTest(self, test)
+
+		def addSuccess(self, test):
+			unittest.TestResult.addSuccess(self, test)
+			self.output('ok')
+
+		def addError(self, test, err):
+			unittest.TestResult.addError(self, test, err)
+			self.output('ERROR')
+
+		def addFailure(self, test, err):
+			unittest.TestResult.addFailure(self, test, err)
+			self.output('FAIL')
+
+		def addSkip(self, test, reason):
+			unittest.TestResult.addSkip(self, test, reason)
+			self.output('skipped %r' % reason)
+
+		def addExpectedFailure(self, test, err):
+			unittest.TestResult.addExpectedFailure(self, test, err)
+			self.output('expected failure')
+
+		def addUnexpectedSuccess(self, test):
+			unittest.TestResult.addUnexpectedSuccess(self, test)
+			self.output('unexpected success')
+
+		def printErrors(self):
+			self.output('')
+
+			self.printList('ERROR', self.errors)
+			self.printList('FAIL', self.failures)
+
+		def printList(self, prefix, errors):
+			for test, error in errors:
+				self.output('%s: %s' % (prefix, self.testDescription(test)))
+				self.output('%s' % error)
 
 	class TestRunner(unittest.TextTestRunner):
 		def _makeResult(self):
