@@ -34,26 +34,26 @@ try:
 except:
 	pass
 
+class FrameBufferCell(object):
+	'''Class which tracks the value and attributes of a character cell in the
+	   framebuffer.
+	'''
+	char = ''
+	attributes = 0
+
+	# Various bit-flag attributes
+	fl_set = (1 << 0) # This cell has a valid value
+
+	def __init__(self):
+		pass
+
+def _newEmptyFrameBufferCell():
+	return FrameBufferCell()
+
 class EmulatedTerminal(object):
 	'''Base class for all the emulated terminals'''
 
-	class FrameBufferCell(object):
-		'''Class which tracks the value and attributes of a character cell in the
-		   framebuffer.
-		'''
-		char = ''
-		attributes = 0
-
-		# Various bit-flag attributes
-		fl_set = (1 << 0) # This cell has a valid value
-
-		def __init__(self):
-			pass
-
-	def _newEmptyFrameBufferCell():
-		return EmulatedTerminal.FrameBufferCell()
-
-	framebuffer = collections.defaultdict(_newEmptyFrameBufferCell)
+	framebuffer = None
 
 	rows = 24
 	cols = 80
@@ -61,6 +61,12 @@ class EmulatedTerminal(object):
 	current_col = 0
 
 	def __init__(self):
+		self.framebuffer = collections.defaultdict(_newEmptyFrameBufferCell)
+
+		self.rows = 24
+		self.cols = 80
+		self.current_row = 0
+		self.current_col = 0
 		pass
 
 	def cell(self, row, col):
