@@ -32,3 +32,13 @@ class EmulatedTerminalTests(TerminalTestCase):
 		cell = self.vty.getCell(0, 3)
 		self.assertCellChar(cell, 'f')
 
+	def test_echoWrapAround(self):
+		for i in range(self.vty.cols):
+			self.vty.interpret('a')
+
+		cell = self.vty.getCell(1, 0)
+		self.assertCellChar(cell, '')
+
+		self.vty.interpret('b')
+		cell = self.vty.getCell(1, 0)
+		self.assertCellChar(cell, 'b')
