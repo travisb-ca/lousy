@@ -97,7 +97,7 @@ class Vtty(object):
 		'''Interpret the given stream of bytes to make their modification to the current
 		   state of the virtual terminal.
 		'''
-		for c in intput:
+		for c in input:
 			emulation.interpret(c)
 
 class ProcessPipe(object):
