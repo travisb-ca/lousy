@@ -519,6 +519,12 @@ if __name__ == '__main__':
 			desc = test.id()
 			return desc
 
+		def testVerbose(self, test):
+			try:
+				return test.verbose_output
+			except:
+				return False
+
 		def startTest(self, test):
 			timing = TestTiming()
 			self.timings[test.id()] = timing
@@ -527,14 +533,14 @@ if __name__ == '__main__':
 			unittest.TestResult.startTest(self, test)
 
 			s = '%s ... ' % self.testDescription(test)
-			self.output(s, newline=test.verbose_output)
+			self.output(s, newline=self.testVerbose(test))
 
 		def stopTest(self, test):
 			test.timing.stop()
 
 			unittest.TestResult.stopTest(self, test)
 
-			if test.verbose_output:
+			if self.testVerbose(test):
 				format = 'test took %f (%f/%f/%f) seconds\n'
 			else:
 				format = '  %fs (%f/%f/%f)'
@@ -546,27 +552,27 @@ if __name__ == '__main__':
 
 		def addSuccess(self, test):
 			unittest.TestResult.addSuccess(self, test)
-			self.output('ok', newline=test.verbose_output)
+			self.output('ok', newline=self.testVerbose(test))
 
 		def addError(self, test, err):
 			unittest.TestResult.addError(self, test, err)
-			self.output('ERROR', newline=test.verbose_output)
+			self.output('ERROR', newline=self.testVerbose(test))
 
 		def addFailure(self, test, err):
 			unittest.TestResult.addFailure(self, test, err)
-			self.output('FAIL', newline=test.verbose_output)
+			self.output('FAIL', newline=self.testVerbose(test))
 
 		def addSkip(self, test, reason):
 			unittest.TestResult.addSkip(self, test, reason)
-			self.output('skipped %r' % reason, newline=test.verbose_output)
+			self.output('skipped %r' % reason, self.testVerbose(test))
 
 		def addExpectedFailure(self, test, err):
 			unittest.TestResult.addExpectedFailure(self, test, err)
-			self.output('expected failure', newline=test.verbose_output)
+			self.output('expected failure', newline=self.testVerbose(test))
 
 		def addUnexpectedSuccess(self, test):
 			unittest.TestResult.addUnexpectedSuccess(self, test)
-			self.output('unexpected success', newline=test.verbose_output)
+			self.output('unexpected success', newline=self.testVerbose(test))
 
 		def printErrors(self):
 			self.output('')
