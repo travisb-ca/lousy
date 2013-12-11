@@ -413,6 +413,10 @@ class Process(object):
 		return -1
 
 class TestCase(unittest.TestCase):
+	# Setting changable by subclasses for whether the tests will output verbosely or not. The
+	# output of the test runner will be modified as appropriate to make it easier to read.
+	verbose_output = False
+
 	def setUp(self):
 		self.setUp2()
 		self.setUp1()
@@ -518,39 +522,47 @@ if __name__ == '__main__':
 
 			unittest.TestResult.startTest(self, test)
 
-			s = '%s...' % self.testDescription(test)
-			self.output(s)
+			s = '%s ... ' % self.testDescription(test)
+			self.output(s, newline=test.verbose_output)
 
 		def stopTest(self, test):
 			test.timing.stop()
-			print 'test took %f (%f/%f/%f) seconds' % (test.timing.totalTime(),
-					test.timing.setupTime(), test.timing.testTime(),
-					test.timing.tearDownTime())
+
 			unittest.TestResult.stopTest(self, test)
+
+			if test.verbose_output:
+				format = 'test took %f (%f/%f/%f) seconds\n'
+			else:
+				format = '  %fs (%f/%f/%f)'
+
+			self.output(format % (test.timing.totalTime(),
+					test.timing.setupTime(), test.timing.testTime(),
+					test.timing.tearDownTime()))
+
 
 		def addSuccess(self, test):
 			unittest.TestResult.addSuccess(self, test)
-			self.output('ok')
+			self.output('ok', newline=test.verbose_output)
 
 		def addError(self, test, err):
 			unittest.TestResult.addError(self, test, err)
-			self.output('ERROR')
+			self.output('ERROR', newline=test.verbose_output)
 
 		def addFailure(self, test, err):
 			unittest.TestResult.addFailure(self, test, err)
-			self.output('FAIL')
+			self.output('FAIL', newline=test.verbose_output)
 
 		def addSkip(self, test, reason):
 			unittest.TestResult.addSkip(self, test, reason)
-			self.output('skipped %r' % reason)
+			self.output('skipped %r' % reason, newline=test.verbose_output)
 
 		def addExpectedFailure(self, test, err):
 			unittest.TestResult.addExpectedFailure(self, test, err)
-			self.output('expected failure')
+			self.output('expected failure', newline=test.verbose_output)
 
 		def addUnexpectedSuccess(self, test):
 			unittest.TestResult.addUnexpectedSuccess(self, test)
-			self.output('unexpected success')
+			self.output('unexpected success', newline=test.verbose_output)
 
 		def printErrors(self):
 			self.output('')
