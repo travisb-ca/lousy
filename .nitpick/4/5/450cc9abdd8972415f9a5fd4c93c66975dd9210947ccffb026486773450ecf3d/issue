@@ -1,0 +1,18 @@
+Component: UI
+Date: 2013-12-11 05:54:45
+Depends_On: 
+Duplicate_Of: 
+Fix_By: 1.0
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Minor
+State: Open
+Title: Vim quickfix settings
+Type: Feature
+Units_of_Work: 1000
+--
+When using Lousy as the 'compiler' for a language such as Python you'll run the tests a lot. It'd be good if there was some way to jump directly to the deepest location on the stack on an error. I know and use Vim so that should be the first editor with a mode.
