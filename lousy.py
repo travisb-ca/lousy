@@ -47,9 +47,6 @@ class FrameBufferCell(object):
 	def __init__(self):
 		pass
 
-def _newEmptyFrameBufferCell():
-	return FrameBufferCell()
-
 class EmulatedTerminal(object):
 	'''Base class for all the emulated terminals'''
 
@@ -61,13 +58,12 @@ class EmulatedTerminal(object):
 	current_col = 0
 
 	def __init__(self):
-		self.framebuffer = collections.defaultdict(_newEmptyFrameBufferCell)
-
 		self.rows = 24
 		self.cols = 80
 		self.current_row = 0
 		self.current_col = 0
-		pass
+
+		self.framebuffer = [[FrameBufferCell() for col in range(self.cols)] for row in range(self.rows)]
 
 	def cell(self, row, col):
 		'''Retreive the FrameBufferCell for the given location. Returns None if the cell is out of range.
@@ -77,7 +73,7 @@ class EmulatedTerminal(object):
 		if col < 0 or col >= self.cols:
 			return None
 
-		return self.framebuffer[(row, col)]
+		return self.framebuffer[row][col]
 
 	def interpret(self, c):
 		'''Take the given character and interpret it'''
@@ -95,9 +91,10 @@ class EmulatedTerminal(object):
 			self.current_col = 0
 			self.current_row += 1
 
-			if self.current_row == self.rows:
-				# TODO Handle scrolling
-				pass
+		if self.current_row == self.rows:
+			del self.framebuffer[0]
+			self.framebuffer.append([FrameBufferCell() for col in range(self.cols)])
+			self.current_row -= 1
 
 class VT100(EmulatedTerminal):
 	'''VT100 terminal emulator'''
