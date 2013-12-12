@@ -54,3 +54,24 @@ class EmulatedTerminalTests(TerminalTestCase):
 
 		self.assertCellChar(0, 0, '3')
 		self.assertCellChar(0, 1, '2')
+
+	def test_echoScrollOffScreen(self):
+		s = 'abcdefghijklmnopqrstuvwxyz'
+
+		for i in range(self.vty.rows - 1):
+			self.vty.interpret(s[i])
+			self.vty.interpret('\r')
+			self.vty.interpret('\n')
+		self.vty.interpret(s[self.vty.rows - 1])
+
+		for i in range(self.vty.rows):
+			self.assertCellChar(i, 0, s[i])
+
+		self.vty.interpret('\r')
+		self.vty.interpret('\n')
+		self.vty.interpret('1')
+
+		for i in range(self.vty.rows - 1):
+			self.assertCellChar(i, 0, s[i + 1])
+
+		self.assertCellChar(self.vty.rows - 1, 0, '1')
