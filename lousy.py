@@ -65,6 +65,30 @@ class EmulatedTerminal(object):
 
 		self.framebuffer = [[FrameBufferCell() for col in range(self.cols)] for row in range(self.rows)]
 
+	def dumpFrameBuffer(self):
+		'''Print out the characters of the framebuffer as it stands. Note that this is
+		   only an approximation as blank cells are written as spaces.
+		'''
+		sys.stdout.write('\n+')
+		for col in range(self.cols):
+			sys.stdout.write('-')
+		sys.stdout.write('+\n')
+
+		for row in range(self.rows):
+			sys.stdout.write('|')
+			for col in range(self.cols):
+				cell = self.cell(row, col)
+
+				if cell.char == '':
+					sys.stdout.write(' ')
+				else:
+					sys.stdout.write(cell.char)
+			sys.stdout.write('|\n')
+		sys.stdout.write('+')
+		for col in range(self.cols):
+			sys.stdout.write('-')
+		sys.stdout.write('+\n')
+
 	def cell(self, row, col):
 		'''Retreive the FrameBufferCell for the given location. Returns None if the cell is out of range.
 		'''
