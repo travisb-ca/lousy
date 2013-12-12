@@ -70,13 +70,27 @@ class DumbTerminal(object):
 		'''Print out the characters of the framebuffer as it stands. Note that this is
 		   only an approximation as blank cells are written as spaces.
 		'''
-		sys.stdout.write('\n+')
+		sys.stdout.write('\n   ')
+		for col in range(self.cols):
+			if col % 10 == 0 and col > 0:
+				sys.stdout.write('%s' % str((col / 10) % 10))
+			else:
+				sys.stdout.write(' ')
+
+		sys.stdout.write('\n   ')
+		for col in range(self.cols):
+			sys.stdout.write('%s' % str(col % 10))
+
+		sys.stdout.write('\n  +')
 		for col in range(self.cols):
 			sys.stdout.write('-')
 		sys.stdout.write('+\n')
 
 		for row in range(self.rows):
-			sys.stdout.write('|')
+			if row % 10 == 0 and row != 0:
+				sys.stdout.write('%s|' % str(row % 100))
+			else:
+				sys.stdout.write(' %s|' % str(row % 10))
 			for col in range(self.cols):
 				cell = self.cell(row, col)
 
@@ -87,7 +101,7 @@ class DumbTerminal(object):
 				else:
 					sys.stdout.write(cell.char)
 			sys.stdout.write('|\n')
-		sys.stdout.write('+')
+		sys.stdout.write('  +')
 		for col in range(self.cols):
 			sys.stdout.write('-')
 		sys.stdout.write('+\n')
