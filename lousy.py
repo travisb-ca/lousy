@@ -56,6 +56,7 @@ class DumbTerminal(object):
 	cols = 80
 	current_row = 0
 	current_col = 0
+	tabstop = 8
 
 	def __init__(self):
 		self.rows = 24
@@ -80,6 +81,8 @@ class DumbTerminal(object):
 				cell = self.cell(row, col)
 
 				if cell.char == '':
+					sys.stdout.write(' ')
+				elif cell.char == '\t':
 					sys.stdout.write(' ')
 				else:
 					sys.stdout.write(cell.char)
@@ -110,6 +113,20 @@ class DumbTerminal(object):
 		elif c == '\b':
 			# Interpret the bell character, but don't do anything with it
 			pass
+		elif c == '\t':
+			# Emulate fixed tab stops
+
+			# If the tabstop would move beyond the edge of the
+			# screen and overwrite the last character don't
+			# write it.
+			if self.current_col != self.cols - 1:
+				cell.char = '\t'
+
+			tabstop = int((self.current_col + self.tabstop)/self.tabstop) * self.tabstop
+			if tabstop >= self.cols:
+				tabstop = self.cols - 1
+
+			self.current_col = tabstop
 		else:
 			cell.char = c
 			self.current_col += 1

@@ -75,3 +75,22 @@ class DumbTerminalTests(TerminalTestCase):
 			self.assertCellChar(i, 0, s[i + 1])
 
 		self.assertCellChar(self.vty.rows - 1, 0, '1')
+
+	def test_tabStops(self):
+		s = 'abcdefghijklmnopqrstuvwxyz'
+
+		for i in range(self.vty.cols / self.vty.tabstop):
+			self.vty.interpret(s[i])
+			self.vty.interpret('\t')
+		overwrite_char = s[self.vty.cols / self.vty.tabstop + 1]
+		self.vty.interpret(overwrite_char)
+
+		for i in range(self.vty.cols):
+			if i % self.vty.tabstop == 0:
+				self.assertCellChar(0, i, s[i / self.vty.tabstop])
+			elif i % self.vty.tabstop == 1:
+				self.assertCellChar(0, i, '\t')
+			elif i == self.vty.cols - 1:
+				self.assertCellChar(0, i, overwrite_char)
+			else:
+				self.assertCellChar(0, i, '')
