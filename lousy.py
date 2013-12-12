@@ -141,6 +141,10 @@ class DumbTerminal(object):
 				tabstop = self.cols - 1
 
 			self.current_col = tabstop
+
+		elif ord(c) < 0x20 or ord(c) >= 0x79:
+			# Don't interpret any other control characters
+			pass
 		else:
 			cell.char = c
 			self.current_col += 1

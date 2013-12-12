@@ -95,3 +95,15 @@ class DumbTerminalTests(TerminalTestCase):
 				self.assertCellChar(0, i, overwrite_char)
 			else:
 				self.assertCellChar(0, i, '')
+
+	def test_ignoreOtherControlChars(self):
+		for i in range(self.vty.cols):
+			self.vty.interpret('a')
+
+		for i in range(0x20):
+			c = chr(i)
+			if c not in '\b\t\n\r':
+				self.vty.interpret(c)
+
+		for i in range(self.vty.cols):
+			self.assertCellChar(0, i, 'a')
