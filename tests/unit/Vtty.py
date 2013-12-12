@@ -6,7 +6,8 @@ class TerminalTestCase(lousy.TestCase):
 	def assertCellChar(self, row, col, char):
 		cell = self.vty.cell(row, col)
 		self.assertIsNotNone(cell)
-		self.assertEqual(cell.char, char)
+		msg = '"%s" != "%s" at cell (%d, %d)' % (char, cell.char, row, col)
+		self.assertEqual(cell.char, char, msg)
 
 class DumbTerminalTests(TerminalTestCase):
 	''' Test the DumbTerminal class '''
