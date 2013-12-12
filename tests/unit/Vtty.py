@@ -8,10 +8,10 @@ class TerminalTestCase(lousy.TestCase):
 		self.assertIsNotNone(cell)
 		self.assertEqual(cell.char, char)
 
-class EmulatedTerminalTests(TerminalTestCase):
-	''' Test the EmulatedTerminal class '''
+class DumbTerminalTests(TerminalTestCase):
+	''' Test the DumbTerminal class '''
 	def setUp1(self):
-		self.vty = lousy.EmulatedTerminal()
+		self.vty = lousy.DumbTerminal()
 
 	def tearDown1(self):
 		pass

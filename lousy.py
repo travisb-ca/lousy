@@ -47,7 +47,7 @@ class FrameBufferCell(object):
 	def __init__(self):
 		pass
 
-class EmulatedTerminal(object):
+class DumbTerminal(object):
 	'''Base class for all the emulated terminals'''
 
 	framebuffer = None
@@ -120,11 +120,11 @@ class EmulatedTerminal(object):
 			self.framebuffer.append([FrameBufferCell() for col in range(self.cols)])
 			self.current_row -= 1
 
-class VT100(EmulatedTerminal):
+class VT100(DumbTerminal):
 	'''VT100 terminal emulator'''
 
 	def __init__(self):
-		EmulatedTerminal.__init__(self)
+		DumbTerminal.__init__(self)
 
 class Vtty(object):
 	'''Vtty is a terminal emulator which interprets the output of a process and keeps a
