@@ -136,12 +136,15 @@ class Vtty(object):
 	def __init__(self, emulation='vt100'):
 		'''emulation is the terminal emulator featureset and control codes to emulate.
 		   Valid values are:
+		   dumb
 		   vt100
 		'''
 		if emulation is True:
 			emulation = 'vt100'
 
-		if emulation == 'vt100':
+		if emulation == 'dumb':
+			self.emulation = DumbTerminal()
+		elif emulation == 'vt100':
 			self.emulation = VT100()
 		else:
 			raise ValueError('%s is not a supported terminal emulation type' % emulation)
