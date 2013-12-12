@@ -51,6 +51,8 @@ class DumbTerminal(object):
 	'''Base class for all the emulated terminals'''
 
 	framebuffer = None
+	modes = {} # Dictionary of dictionaries of methods to call
+	current_mode = 'default'
 
 	rows = 24
 	cols = 80
@@ -65,6 +67,42 @@ class DumbTerminal(object):
 		self.current_col = 0
 
 		self.framebuffer = [[FrameBufferCell() for col in range(self.cols)] for row in range(self.rows)]
+
+		self.modes['default'] = {
+				'default': self.i_default_chars,
+				chr(0x00): self.i_ignore,
+				chr(0x01): self.i_ignore,
+				chr(0x02): self.i_ignore,
+				chr(0x03): self.i_ignore,
+				chr(0x04): self.i_ignore,
+				chr(0x05): self.i_ignore,
+				chr(0x06): self.i_ignore,
+				'\b': self.i_default_bell,
+				chr(0x08): self.i_ignore,
+				'\t': self.i_default_tab,
+				'\n': self.i_default_newline,
+				chr(0x0b): self.i_ignore,
+				chr(0x0c): self.i_ignore,
+				'\r': self.i_default_carriageReturn,
+				chr(0x0e): self.i_ignore,
+				chr(0x0f): self.i_ignore,
+				chr(0x10): self.i_ignore,
+				chr(0x11): self.i_ignore,
+				chr(0x12): self.i_ignore,
+				chr(0x13): self.i_ignore,
+				chr(0x14): self.i_ignore,
+				chr(0x15): self.i_ignore,
+				chr(0x16): self.i_ignore,
+				chr(0x17): self.i_ignore,
+				chr(0x18): self.i_ignore,
+				chr(0x19): self.i_ignore,
+				chr(0x1a): self.i_ignore,
+				chr(0x1b): self.i_ignore,
+				chr(0x1c): self.i_ignore,
+				chr(0x1d): self.i_ignore,
+				chr(0x1e): self.i_ignore,
+				chr(0x1f): self.i_ignore,
+				}
 
 	def dumpFrameBuffer(self):
 		'''Print out the characters of the framebuffer as it stands. Note that this is
@@ -120,34 +158,10 @@ class DumbTerminal(object):
 		'''Take the given character and interpret it'''
 		cell = self.cell(self.current_row, self.current_col)
 
-		if c == '\n':
-			self.current_row += 1
-		elif c == '\r':
-			self.current_col = 0
-		elif c == '\b':
-			# Interpret the bell character, but don't do anything with it
-			pass
-		elif c == '\t':
-			# Emulate fixed tab stops
-
-			# If the tabstop would move beyond the edge of the
-			# screen and overwrite the last character don't
-			# write it.
-			if self.current_col != self.cols - 1:
-				cell.char = '\t'
-
-			tabstop = int((self.current_col + self.tabstop)/self.tabstop) * self.tabstop
-			if tabstop >= self.cols:
-				tabstop = self.cols - 1
-
-			self.current_col = tabstop
-
-		elif ord(c) < 0x20 or ord(c) >= 0x79:
-			# Don't interpret any other control characters
-			pass
+		if c in self.modes[self.current_mode]:
+			self.modes[self.current_mode][c](cell, c)
 		else:
-			cell.char = c
-			self.current_col += 1
+			self.modes[self.current_mode]['default'](cell, c)
 
 		if self.current_col == self.cols:
 			self.current_col = 0
@@ -157,6 +171,39 @@ class DumbTerminal(object):
 			del self.framebuffer[0]
 			self.framebuffer.append([FrameBufferCell() for col in range(self.cols)])
 			self.current_row -= 1
+
+	def i_ignore(self, cell, c):
+		'''Ignore the character'''
+		pass
+
+	def i_default_chars(self, cell, c):
+		cell.char = c
+		self.current_col += 1
+
+	def i_default_bell(self, cell, c):
+		# Interpret the bell character, but don't do anything with it
+		pass
+
+	def i_default_tab(self, cell, c):
+		# Emulate fixed tab stops
+
+		# If the tabstop would move beyond the edge of the
+		# screen and overwrite the last character don't
+		# write it.
+		if self.current_col != self.cols - 1:
+			cell.char = '\t'
+
+		tabstop = int((self.current_col + self.tabstop)/self.tabstop) * self.tabstop
+		if tabstop >= self.cols:
+			tabstop = self.cols - 1
+
+		self.current_col = tabstop
+
+	def i_default_newline(self, cell, c):
+		self.current_row += 1
+
+	def i_default_carriageReturn(self, cell, c):
+		self.current_col = 0
 
 class VT100(DumbTerminal):
 	'''VT100 terminal emulator'''
