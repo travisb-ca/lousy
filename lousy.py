@@ -107,6 +107,9 @@ class DumbTerminal(object):
 			self.current_row += 1
 		elif c == '\r':
 			self.current_col = 0
+		elif c == '\b':
+			# Interpret the bell character, but don't do anything with it
+			pass
 		else:
 			cell.char = c
 			self.current_col += 1
