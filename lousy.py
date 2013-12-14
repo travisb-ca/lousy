@@ -56,13 +56,17 @@ class DumbTerminal(object):
 
 	rows = 24
 	cols = 80
-	current_row = 0
-	current_col = 0
 	tabstop = 8
 
+	# Should the text wrap to the next line when it reaches the end of
+	# the line automatically
+	autowrap = True
+
+	# Should the screen scroll automatically when entering the new line
+	# in the bottom-most line of the terminal
+	autoscroll = True
+
 	def __init__(self):
-		self.rows = 24
-		self.cols = 80
 		self.current_row = 0
 		self.current_col = 0
 
@@ -165,12 +169,16 @@ class DumbTerminal(object):
 			self.modes[self.current_mode]['default'](cell, c)
 
 		if self.current_col == self.cols:
-			self.current_col = 0
-			self.current_row += 1
+			if self.autowrap:
+				self.current_col = 0
+				self.current_row += 1
+			else:
+				self.current_col = self.cols - 1
 
 		if self.current_row == self.rows:
-			del self.framebuffer[0]
-			self.framebuffer.append([FrameBufferCell() for col in range(self.cols)])
+			if self.autoscroll:
+				del self.framebuffer[0]
+				self.framebuffer.append([FrameBufferCell() for col in range(self.cols)])
 			self.current_row -= 1
 
 	def i_ignore(self, cell, c):
@@ -209,6 +217,56 @@ class DumbTerminal(object):
 
 	def i_default_carriageReturn(self, cell, c):
 		self.current_col = 0
+
+class VT05(DumbTerminal):
+	'''Emulate the VT05 according to http://www.vt100.net/docs/vt05-rm/chapter3.html 
+	   This isn't expected to be useful, but is rather more a simple 'smart' terminal to work
+	   out the emulation inheritance.
+	'''
+
+	def __init__(self):
+		self.rows = 20
+		self.cols = 72
+
+		self.autowrap = False
+
+		DumbTerminal.__init__(self)
+
+		self.modes['default'][chr(0x18)] = self.i_default_cursorRight
+		self.modes['default'][chr(0x0b)] = self.i_default_cursorDown
+		self.modes['default'][chr(0x1a)] = self.i_default_cursorUp
+		self.modes['default'][chr(0x1d)] = self.i_default_cursorHome
+
+	def i_default_cursorRight(self, cell, c):
+		if self.current_col < self.cols - 1:
+			self.current_col += 1
+
+	def i_default_cursorDown(self, cell, c):
+		if self.current_row < self.rows - 1:
+			self.current_row += 1
+
+	def i_default_cursorUp(self, cell, c):
+		if self.current_row > 0:
+			self.current_row -= 1
+
+	def i_default_cursorHome(self, cell, c):
+		self.current_col = 0
+		self.current_row = 0
+
+	def i_default_tab(self, cell, c):
+		if self.current_col < self.cols - 1:
+			cell.char = '\t'
+
+		if self.current_col < 64:
+			stops = [0, 8, 16, 24, 32, 40, 48, 56, 64]
+			for i in range(len(stops)):
+				if self.current_col < stops[i]:
+					self.current_col = stops[i]
+					return
+		elif self.current_col == 71:
+			pass
+		else: # 64 <= current_col < 71
+			self.current_col += 1
 
 class VT100(DumbTerminal):
 	'''VT100 terminal emulator'''
