@@ -102,6 +102,7 @@ class DumbTerminal(object):
 				chr(0x1d): self.i_ignore,
 				chr(0x1e): self.i_ignore,
 				chr(0x1f): self.i_ignore,
+				chr(0x7f): self.i_ignore,
 				}
 
 	def dumpFrameBuffer(self):
