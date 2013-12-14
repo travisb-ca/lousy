@@ -335,15 +335,20 @@ class Vtty(object):
 		'''emulation is the terminal emulator featureset and control codes to emulate.
 		   Valid values are:
 		   dumb
+		   vt05
 		   vt100
 		'''
 		if emulation is True:
 			emulation = 'vt100'
 
-		if emulation == 'dumb':
-			self.emulation = DumbTerminal()
-		elif emulation == 'vt100':
-			self.emulation = VT100()
+		emulations = {
+				'dumb': DumbTerminal,
+				'vt05': VT05,
+				'vt100': VT100,
+				}
+
+		if emulation in emulations:
+			self.emulation = emulations[emulation]()
 		else:
 			raise ValueError('%s is not a supported terminal emulation type' % emulation)
 
