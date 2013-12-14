@@ -283,3 +283,32 @@ class VT05Tests(TerminalTestCase):
 					c = s[i % len(s)]
 
 				self.assertCellChar(line, i, c)
+
+	def test_cursorAddressing(self):
+		s = 'abcdefghijklmnopqrstuvwxyz'
+
+		for line in range(15):
+			for i in range(self.vty.cols):
+				self.vty.interpret(s[i % len(s)])
+			self.vty.interpret('\r')
+			self.vty.interpret('\n')
+
+		# Content Address to row 5 col 4
+		self.vty.interpret(chr(0x0e))
+		self.vty.interpret('%')
+		self.vty.interpret('$')
+
+		self.vty.interpret('1')
+		self.vty.interpret('1')
+		self.vty.interpret('1')
+		self.vty.interpret('1')
+		self.vty.interpret('1')
+
+		for line in range(15):
+			for i in range(self.vty.cols):
+				if line == 5 and i >= 4 and i <= 8:
+					c = '1'
+				else:
+					c = s[i % len(s)]
+
+				self.assertCellChar(line, i, c)

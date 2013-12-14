@@ -234,10 +234,15 @@ class VT05(DumbTerminal):
 
 		self.modes['normal'][chr(0x18)] = self.i_normal_cursorRight
 		self.modes['normal'][chr(0x0b)] = self.i_normal_cursorDown
+		self.modes['normal'][chr(0x0e)] = self.i_normal_cursorAddress
 		self.modes['normal'][chr(0x1a)] = self.i_normal_cursorUp
 		self.modes['normal'][chr(0x1d)] = self.i_normal_cursorHome
 		self.modes['normal'][chr(0x1e)] = self.i_normal_eraseLine
 		self.modes['normal'][chr(0x1f)] = self.i_normal_eraseScreen
+
+		self.modes['cad'] = {
+				'default': self.i_cad_address
+				}
 
 	def i_normal_cursorRight(self, cell, c):
 		if self.current_col < self.cols - 1:
@@ -284,6 +289,34 @@ class VT05(DumbTerminal):
 			for col in range(self.cols):
 				cell = self.cell(row, col)
 				cell.char = ''
+
+	def i_normal_cursorAddress(self, cell, c):
+		self.current_mode = 'cad'
+		self._new_x = None
+		self._new_y = None
+
+	def i_cad_address(self, cell, c):
+		if self._new_y is None:
+			# Capture the new Y location
+			y = ord(c) - ord(' ')
+			if y < 0 or y >= self.rows:
+				# Ignore this input and wait for more
+				return
+			else:
+				self._new_y = y
+		else:
+			# Capture the new X location
+			x = ord(c) - ord(' ')
+			if x < 0 or x >= self.cols:
+				# Ignore this input and wait for more
+				return
+			else:
+				self._new_x = x
+
+				# We now have both the new x and new y, use them
+				self.current_row = self._new_y
+				self.current_col = self._new_x
+				self.current_mode = 'normal'
 
 class VT100(DumbTerminal):
 	'''VT100 terminal emulator'''
