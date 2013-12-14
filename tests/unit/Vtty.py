@@ -102,8 +102,20 @@ class DumbTerminalTests(TerminalTestCase):
 
 		for i in range(0x20):
 			c = chr(i)
-			if c not in '\b\t\n\r':
+			if c not in '\a\b\t\n\r':
 				self.vty.interpret(c)
 
 		for i in range(self.vty.cols):
 			self.assertCellChar(0, i, 'a')
+
+	def test_backspace(self):
+		self.vty.interpret('a')
+		self.vty.interpret('b')
+		self.vty.interpret('c')
+		self.vty.interpret('\b')
+		self.vty.interpret('\b')
+		self.vty.interpret('d')
+
+		self.assertCellChar(0, 0, 'a')
+		self.assertCellChar(0, 1, 'd')
+		self.assertCellChar(0, 2, 'c')

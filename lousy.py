@@ -77,8 +77,8 @@ class DumbTerminal(object):
 				chr(0x04): self.i_ignore,
 				chr(0x05): self.i_ignore,
 				chr(0x06): self.i_ignore,
-				'\b': self.i_default_bell,
-				chr(0x08): self.i_ignore,
+				'\a': self.i_default_bell,
+				'\b': self.i_default_backspace,
 				'\t': self.i_default_tab,
 				'\n': self.i_default_newline,
 				chr(0x0b): self.i_ignore,
@@ -183,6 +183,10 @@ class DumbTerminal(object):
 	def i_default_bell(self, cell, c):
 		# Interpret the bell character, but don't do anything with it
 		pass
+
+	def i_default_backspace(self, cell, c):
+		if self.current_col > 0:
+			self.current_col -= 1
 
 	def i_default_tab(self, cell, c):
 		# Emulate fixed tab stops
