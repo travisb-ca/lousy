@@ -230,3 +230,56 @@ class VT05Tests(TerminalTestCase):
 			self.assertCellChar(0, i, c)
 
 		self.assertCellChar(1, 0, '9')
+
+	def test_eraseLine(self):
+		s = 'abcdefghijklmnopqrstuvwxyz'
+
+		for line in range(2):
+			for i in range(self.vty.cols):
+				self.vty.interpret(s[i % len(s)])
+			self.vty.interpret('\r')
+			self.vty.interpret('\n')
+
+		# Move cursor to row 0 col 47
+		self.vty.interpret(chr(0x1d))
+		for i in range(47):
+			self.vty.interpret(chr(0x18))
+		self.vty.interpret(chr(0x1e))
+
+		for line in range(2):
+			for i in range(self.vty.cols):
+				if line == 0 and i >= 47:
+					c = ''
+				else:
+					c = s[i % len(s)]
+
+				self.assertCellChar(line, i, c)
+
+	def test_eraseScreen(self):
+		s = 'abcdefghijklmnopqrstuvwxyz'
+
+		for line in range(15):
+			for i in range(self.vty.cols):
+				self.vty.interpret(s[i % len(s)])
+			self.vty.interpret('\r')
+			self.vty.interpret('\n')
+
+		# Move cursor to row 6 col 47
+		self.vty.interpret(chr(0x1d))
+		for i in range(47):
+			self.vty.interpret(chr(0x18))
+		for i in range(6):
+			self.vty.interpret(chr(0x0b))
+
+		self.vty.interpret(chr(0x1f))
+
+		for line in range(15):
+			for i in range(self.vty.cols):
+				if line == 6 and i >= 47:
+					c = ''
+				elif line > 6:
+					c = ''
+				else:
+					c = s[i % len(s)]
+
+				self.assertCellChar(line, i, c)

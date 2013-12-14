@@ -236,6 +236,8 @@ class VT05(DumbTerminal):
 		self.modes['normal'][chr(0x0b)] = self.i_normal_cursorDown
 		self.modes['normal'][chr(0x1a)] = self.i_normal_cursorUp
 		self.modes['normal'][chr(0x1d)] = self.i_normal_cursorHome
+		self.modes['normal'][chr(0x1e)] = self.i_normal_eraseLine
+		self.modes['normal'][chr(0x1f)] = self.i_normal_eraseScreen
 
 	def i_normal_cursorRight(self, cell, c):
 		if self.current_col < self.cols - 1:
@@ -267,6 +269,21 @@ class VT05(DumbTerminal):
 			pass
 		else: # 64 <= current_col < 71
 			self.current_col += 1
+
+	def eraseToEndOfLine(self):
+		for i in range(self.current_col, self.cols):
+			cell = self.cell(self.current_row, i)
+			cell.char = ''
+
+	def i_normal_eraseLine(self, cell, c):
+		self.eraseToEndOfLine()
+
+	def i_normal_eraseScreen(self, cell, c):
+		self.eraseToEndOfLine()
+		for row in range(self.current_row + 1, self.rows):
+			for col in range(self.cols):
+				cell = self.cell(row, col)
+				cell.char = ''
 
 class VT100(DumbTerminal):
 	'''VT100 terminal emulator'''
