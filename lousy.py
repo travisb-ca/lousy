@@ -52,7 +52,7 @@ class DumbTerminal(object):
 
 	framebuffer = None
 	modes = {} # Dictionary of dictionaries of methods to call
-	current_mode = 'default'
+	current_mode = 'normal'
 
 	rows = 24
 	cols = 80
@@ -72,8 +72,8 @@ class DumbTerminal(object):
 
 		self.framebuffer = [[FrameBufferCell() for col in range(self.cols)] for row in range(self.rows)]
 
-		self.modes['default'] = {
-				'default': self.i_default_chars,
+		self.modes['normal'] = {
+				'default': self.i_normal_chars,
 				chr(0x00): self.i_ignore,
 				chr(0x01): self.i_ignore,
 				chr(0x02): self.i_ignore,
@@ -81,13 +81,13 @@ class DumbTerminal(object):
 				chr(0x04): self.i_ignore,
 				chr(0x05): self.i_ignore,
 				chr(0x06): self.i_ignore,
-				'\a': self.i_default_bell,
-				'\b': self.i_default_backspace,
-				'\t': self.i_default_tab,
-				'\n': self.i_default_newline,
+				'\a': self.i_normal_bell,
+				'\b': self.i_normal_backspace,
+				'\t': self.i_normal_tab,
+				'\n': self.i_normal_newline,
 				chr(0x0b): self.i_ignore,
 				chr(0x0c): self.i_ignore,
-				'\r': self.i_default_carriageReturn,
+				'\r': self.i_normal_carriageReturn,
 				chr(0x0e): self.i_ignore,
 				chr(0x0f): self.i_ignore,
 				chr(0x10): self.i_ignore,
@@ -185,19 +185,19 @@ class DumbTerminal(object):
 		'''Ignore the character'''
 		pass
 
-	def i_default_chars(self, cell, c):
+	def i_normal_chars(self, cell, c):
 		cell.char = c
 		self.current_col += 1
 
-	def i_default_bell(self, cell, c):
+	def i_normal_bell(self, cell, c):
 		# Interpret the bell character, but don't do anything with it
 		pass
 
-	def i_default_backspace(self, cell, c):
+	def i_normal_backspace(self, cell, c):
 		if self.current_col > 0:
 			self.current_col -= 1
 
-	def i_default_tab(self, cell, c):
+	def i_normal_tab(self, cell, c):
 		# Emulate fixed tab stops
 
 		# If the tabstop would move beyond the edge of the
@@ -212,10 +212,10 @@ class DumbTerminal(object):
 
 		self.current_col = tabstop
 
-	def i_default_newline(self, cell, c):
+	def i_normal_newline(self, cell, c):
 		self.current_row += 1
 
-	def i_default_carriageReturn(self, cell, c):
+	def i_normal_carriageReturn(self, cell, c):
 		self.current_col = 0
 
 class VT05(DumbTerminal):
@@ -232,28 +232,28 @@ class VT05(DumbTerminal):
 
 		DumbTerminal.__init__(self)
 
-		self.modes['default'][chr(0x18)] = self.i_default_cursorRight
-		self.modes['default'][chr(0x0b)] = self.i_default_cursorDown
-		self.modes['default'][chr(0x1a)] = self.i_default_cursorUp
-		self.modes['default'][chr(0x1d)] = self.i_default_cursorHome
+		self.modes['normal'][chr(0x18)] = self.i_normal_cursorRight
+		self.modes['normal'][chr(0x0b)] = self.i_normal_cursorDown
+		self.modes['normal'][chr(0x1a)] = self.i_normal_cursorUp
+		self.modes['normal'][chr(0x1d)] = self.i_normal_cursorHome
 
-	def i_default_cursorRight(self, cell, c):
+	def i_normal_cursorRight(self, cell, c):
 		if self.current_col < self.cols - 1:
 			self.current_col += 1
 
-	def i_default_cursorDown(self, cell, c):
+	def i_normal_cursorDown(self, cell, c):
 		if self.current_row < self.rows - 1:
 			self.current_row += 1
 
-	def i_default_cursorUp(self, cell, c):
+	def i_normal_cursorUp(self, cell, c):
 		if self.current_row > 0:
 			self.current_row -= 1
 
-	def i_default_cursorHome(self, cell, c):
+	def i_normal_cursorHome(self, cell, c):
 		self.current_col = 0
 		self.current_row = 0
 
-	def i_default_tab(self, cell, c):
+	def i_normal_tab(self, cell, c):
 		if self.current_col < self.cols - 1:
 			cell.char = '\t'
 
