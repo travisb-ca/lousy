@@ -52,7 +52,7 @@ class DumbTerminal(object):
 
 	framebuffer = None
 	modes = {} # Dictionary of dictionaries of methods to call
-	current_mode = 'normal'
+	mode = 'normal'
 
 	rows = 24
 	cols = 80
@@ -163,10 +163,10 @@ class DumbTerminal(object):
 		'''Take the given character and interpret it'''
 		cell = self.cell(self.current_row, self.current_col)
 
-		if c in self.modes[self.current_mode]:
-			self.modes[self.current_mode][c](cell, c)
+		if c in self.modes[self.mode]:
+			self.modes[self.mode][c](cell, c)
 		else:
-			self.modes[self.current_mode]['default'](cell, c)
+			self.modes[self.mode]['default'](cell, c)
 
 		if self.current_col == self.cols:
 			if self.autowrap:
@@ -291,7 +291,7 @@ class VT05(DumbTerminal):
 				cell.char = ''
 
 	def i_normal_cursorAddress(self, cell, c):
-		self.current_mode = 'cad'
+		self.mode = 'cad'
 		self._new_x = None
 		self._new_y = None
 
@@ -316,7 +316,7 @@ class VT05(DumbTerminal):
 				# We now have both the new x and new y, use them
 				self.current_row = self._new_y
 				self.current_col = self._new_x
-				self.current_mode = 'normal'
+				self.mode = 'normal'
 
 class VT100(DumbTerminal):
 	'''VT100 terminal emulator'''
