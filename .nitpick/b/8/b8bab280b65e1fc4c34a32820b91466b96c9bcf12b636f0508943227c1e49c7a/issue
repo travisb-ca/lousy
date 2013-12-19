@@ -1,0 +1,18 @@
+Component: Test_Runner
+Date: 2013-12-19 04:41:39
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Eventually
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Minor
+State: Open
+Title: Test Tags
+Type: Feature
+Units_of_Work: 1000
+--
+A possibly useful feature would be to specify a number of tags on individual tests and then be able to run based on tag or set of tags.
