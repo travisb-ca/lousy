@@ -312,3 +312,76 @@ class VT05Tests(TerminalTestCase):
 					c = s[i % len(s)]
 
 				self.assertCellChar(line, i, c)
+
+class VT100Tests(TerminalTestCase):
+	'''Test the VT100 class'''
+	def setUp1(self):
+		self.vty = lousy.VT100()
+
+	def tearDown1(self):
+		pass
+
+	def test_clearScreen(self):
+		for i in range(self.vty.cols - 2):
+			self.vty.interpret('a')
+
+		self.vty.interpret(chr(0x1b))
+		self.vty.interpret('[')
+		self.vty.interpret('2')
+		self.vty.interpret('J')
+
+		for i in range(self.vty.cols - 2):
+			self.assertCellChar(0, i, '')
+
+	def test_argumentlessCursorPlace(self):
+		for i in range(self.vty.rows - 2):
+			self.vty.interpret('a')
+			self.vty.interpret('\n')
+
+		self.vty.interpret(chr(0x1b))
+		self.vty.interpret('[')
+		self.vty.interpret('f')
+		
+		self.vty.interpret('b')
+
+		self.assertCellChar(0, 0, 'b')
+		for i in range(1, self.vty.rows - 2):
+			self.assertCellChar(i, i, 'a')
+
+	def test_emptyArgumentCursorPlace(self):
+		for i in range(self.vty.rows - 2):
+			self.vty.interpret('a')
+			self.vty.interpret('\n')
+
+		self.vty.interpret(chr(0x1b))
+		self.vty.interpret('[')
+		self.vty.interpret(';')
+		self.vty.interpret('f')
+		
+		self.vty.interpret('b')
+
+		self.assertCellChar(0, 0, 'b')
+		for i in range(1, self.vty.rows - 2):
+			self.assertCellChar(i, i, 'a')
+
+	def test_argumentCursorPlace(self):
+		for i in range(self.vty.rows - 2):
+			self.vty.interpret('a')
+			self.vty.interpret('\n')
+
+		self.vty.interpret(chr(0x1b))
+		self.vty.interpret('[')
+		self.vty.interpret('2')
+		self.vty.interpret('0')
+		self.vty.interpret(';')
+		self.vty.interpret('2')
+		self.vty.interpret('0')
+		self.vty.interpret('f')
+		
+		self.vty.interpret('b')
+
+		# cells are 1-indexed in the spec
+		self.assertCellChar(19, 19, 'b')
+		for i in range(self.vty.rows - 2):
+			if i != 19:
+				self.assertCellChar(i, i, 'a')

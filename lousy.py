@@ -322,7 +322,66 @@ class VT100(DumbTerminal):
 	'''VT100 terminal emulator'''
 
 	def __init__(self):
+		self.rows = 24
+		self.cols = 80
+
 		DumbTerminal.__init__(self)
+
+		self.modes['normal'][chr(0x1b)] = self.i_normal_escape
+
+		self.modes['escape'] = {
+				'default': self.i_escape_exit,
+				'[': self.i_escape_csi,
+				}
+
+		self.modes['csi'] = {
+				'default': self.i_csi_collectParams,
+				'J': self.i_csi_clearScreen,
+				'f': self.i_csi_placeCursor,
+				}
+
+	def i_normal_escape(self, cell, c):
+		# Start an escape sequence
+		self.mode = 'escape'
+
+	def i_escape_exit(self, cell, c):
+		self.mode = 'normal'
+	
+	def i_escape_csi(self, cell, c):
+		self.mode = 'csi'
+		self.csi_params = ''
+
+	def i_csi_collectParams(self, cell, c):
+		self.csi_params += c
+
+	def i_csi_clearScreen(self, cell, c):
+		if self.csi_params == '2':
+			# Clear the entire screen
+			for row in range(self.rows):
+				for col in range(self.cols):
+					cell = self.cell(row, col)
+					cell.char = ''
+		else:
+			# TODO Implement the other modes
+			pass
+
+		self.mode = 'normal'
+
+	def i_csi_placeCursor(self, cell, c):
+		if self.csi_params == '':
+			self.current_row = 0
+			self.current_col = 0
+		else:
+			coords = self.csi_params.split(';')
+			if coords == ['', '']:
+				# Received ';' so go to 0,0
+				self.current_row = 0
+				self.current_col = 0
+			else:
+				# Assume 'l;c'
+				self.current_row = max(int(coords[0]) - 1, 0)
+				self.current_col = max(int(coords[1]) - 1, 0)
+		self.mode = 'normal'
 
 class Vtty(object):
 	'''Vtty is a terminal emulator which interprets the output of a process and keeps a
