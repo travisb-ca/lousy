@@ -390,6 +390,13 @@ class Vtty(object):
 
 	emulation = None
 
+	supported = {
+			'dumb': DumbTerminal,
+			'vt05': VT05,
+			'vt100': VT100,
+			}
+
+
 	def __init__(self, emulation='vt100'):
 		'''emulation is the terminal emulator featureset and control codes to emulate.
 		   Valid values are:
@@ -400,14 +407,8 @@ class Vtty(object):
 		if emulation is True:
 			emulation = 'vt100'
 
-		emulations = {
-				'dumb': DumbTerminal,
-				'vt05': VT05,
-				'vt100': VT100,
-				}
-
-		if emulation in emulations:
-			self.emulation = emulations[emulation]()
+		if emulation in self.supported:
+			self.emulation = self.supported[emulation]()
 		else:
 			raise ValueError('%s is not a supported terminal emulation type' % emulation)
 
@@ -416,7 +417,7 @@ class Vtty(object):
 		   state of the virtual terminal.
 		'''
 		for c in input:
-			emulation.interpret(c)
+			self.emulation.interpret(c)
 
 class ProcessPipe(object):
 	'''File object to interact with processes.
@@ -427,7 +428,7 @@ class ProcessPipe(object):
 	prefix = ''
 	closed = False
 	buffer = ''
-	mirror = None
+	_mirror = None
 
 	def __init__(self):
 		self.pipes = os.pipe()
@@ -437,11 +438,11 @@ class ProcessPipe(object):
 	def setPrefix(self, prefix):
 		self.prefix = prefix
 
-	def setMirror(self, newMirror):
+	def mirror(self, newMirror):
 		'''A mirror is an object which the ProcessPipe calls obj.append() on with the
 		   newly read data. Useful for alternative interpretations of the output.
 		'''
-		self.mirror = newMirror
+		self._mirror = newMirror
 
 	def fileno(self):
 		return self.pipes[self._direction]
@@ -493,8 +494,8 @@ class ProcessPipe(object):
 
 		output = os.read(self.pipes[self._fileno], 102400)
 
-		if self.mirror is not None:
-			self.mirror.append(output)
+		if self._mirror is not None:
+			self._mirror.append(output)
 
 		if len(output) > 0:
 			lines = self.escapeAscii(output).split('\\n')
@@ -584,14 +585,19 @@ class Process(object):
 		   to be interpretted by the shell.
 		'''
 
-		if pty:
+		if pty == True or type(pty) == type(''):
 			self.stdin = PtyProcessPipe()
 			self.stdout = self.stdin
 			self.stderr = self.stdin
+
+			if pty != True:
+				self.vty = Vtty(pty)
+				self.stdout.mirror(self.vty)
 		else:
 			self.stdin = InProcessPipe()
 			self.stdout = OutProcessPipe()
 			self.stderr = OutProcessPipe()
+			self.vty = None
 
 		self.returncode = None
 		self.running = False
