@@ -26,6 +26,7 @@ import errno
 import select
 import re
 import collections
+import copy
 import pprint
 
 # A hack to allow us to pass the debug setting from lousy as a script to lousy as a library
@@ -418,6 +419,31 @@ class Vtty(object):
 		'''
 		for c in input:
 			self.emulation.interpret(c)
+
+	def cell(self, row, col):
+		return self.emulation.cell(row, col)
+
+	def cursorPosition(self):
+		'''Return the 2-tuple with the current cursor position'''
+		return (self.emulation.current_row, self.emulation.current_col)
+
+	def cols(self):
+		'''Returns the number of columns in the virtual terminal'''
+		return self.emulation.cols
+
+	def rows(self):
+		'''Returns the number of rows in the virtual terminal'''
+		return self.emulation.rows
+
+	def snapShotScreen(self):
+		'''Returns an opaque object which is a snapshot of the virtual
+		   screen contents. This object can be compared with other
+		   snapshots, but will not contain the terminal state (such as
+		   in progress state changes).
+		'''
+		if _debug:
+			self.emulation.dumpFrameBuffer()
+		return copy.deepcopy(self.emulation.framebuffer)
 
 class ProcessPipe(object):
 	'''File object to interact with processes.
