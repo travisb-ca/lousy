@@ -1,0 +1,8 @@
+Attachment: 
+Attachment-filename: 
+Attachment-type: application/octet-stream
+Date: 2013-12-20 02:59:44
+Parent: issue
+User: travisb@travisbrown.ca
+--
+It isn't strictly a glob, but regexes are more powerful and easier to code.

@@ -883,24 +883,39 @@ if __name__ == '__main__':
 		def _makeResult(self):
 			return TestResult()
 
-	def cmd_list(args):
-		def list_tests(test_root, test_root_name):
-			for test_file in test_root:
-				for test_class in test_file:
-					for test in test_class:
-						print '%s/%s' % (test_root_name, test.id())
+	# Given a TestSuite of TestSuits of TestClasses, return a list of only those tests whose ID
+	# matches the given regex.
+	#
+	# Returns an empty list if none match
+	def filter_tests(test_root, type, regex):
+		if regex == '':
+			regex = '.+'
 
+		result = []
+
+		for test_file in test_root:
+			for test_class in test_file:
+				for test in test_class:
+					if re.search(regex, type + '/' + test.id()) is not None:
+						result.append(test)
+		return result
+
+	def cmd_list(args):
 		unit_tests = unittest.defaultTestLoader.discover('tests/unit', pattern='*.py', top_level_dir='tests/unit')
-		list_tests(unit_tests, 'unit')
+		for test in filter_tests(unit_tests, 'unit', args.re):
+			print 'unit/%s' % test.id()
 
 		component_tests = unittest.defaultTestLoader.discover('tests/component', pattern='*.py', top_level_dir='tests/component')
-		list_tests(component_tests, 'component')
+		for test in filter_tests(component_tests, 'component', args.re):
+			print 'component/%s' % test.id()
 
 		slow_tests = unittest.defaultTestLoader.discover('tests/slow', pattern='*.py', top_level_dir='tests/slow')
-		list_tests(slow_tests, 'slow')
+		for test in filter_tests(slow_tests, 'slow', args.re):
+			print 'slow/%s' % test.id()
 
 		constrained_tests = unittest.defaultTestLoader.discover('tests/constrained', pattern='*.py', top_level_dir='tests/constrained')
-		list_tests(constrained_tests, 'constrained')
+		for test in filter_tests(constrained_tests, 'constrained', args.re):
+			print 'constrained/%s' % test.id()
 
 		return True
 
@@ -918,19 +933,19 @@ if __name__ == '__main__':
 
 		if args.unit:
 			unittests = unittest.defaultTestLoader.discover('tests/unit', pattern='*.py', top_level_dir='tests/unit')
-			tests.addTest(unittests)
+			tests.addTests(filter_tests(unittests, 'unit', args.re))
 		
 		if args.component:
 			componenttests = unittest.defaultTestLoader.discover('tests/component', pattern='*.py', top_level_dir='tests/component')
-			tests.addTest(componenttests)
+			tests.addTests(filter_tests(componenttests, 'component', args.re))
 		
 		if args.slow:
 			slowtests = unittest.defaultTestLoader.discover('tests/slow', pattern='*.py', top_level_dir='tests/slow')
-			tests.addTest(slowtests)
+			tests.addTests(filter_tests(slowtests, 'slow', args.re))
 		
 		if args.constrained:
 			constrainedtests = unittest.defaultTestLoader.discover('tests/constrained', pattern='*.py', top_level_dir='tests/constrained')
-			tests.addTest(constrainedtests)
+			tests.addTests(filter_tests(constrainedtests, 'constrained', args.re))
 
 		if tests.countTestCases() == 0:
 			print 'No tests selected to run'
@@ -945,6 +960,7 @@ if __name__ == '__main__':
 	subcmds = parser.add_subparsers(help='command help')
 
 	list_cmd = subcmds.add_parser('list', help='List all tests')
+	list_cmd.add_argument('re', nargs='?', default='.+', help='Regex used to filter returned tests')
 	list_cmd.set_defaults(func=cmd_list)
 
 	run_cmd = subcmds.add_parser('run', help='Run tests, defaults to all tests')
@@ -953,6 +969,7 @@ if __name__ == '__main__':
 	run_cmd.add_argument('-s', '--slow', action='store_true', help='Run the slow tests')
 	run_cmd.add_argument('-C', '--constrained', action='store_true', help='Run the constrained tests')
 	run_cmd.add_argument('-d', '--debug', action='store_true', help='Output debug logging while running tests')
+	run_cmd.add_argument('re', nargs='?', default='.+', help='Regex used to filter run tests')
 	run_cmd.set_defaults(func=cmd_run)
 
 	# Make it possible for tests to import modules from their parent tests directory
