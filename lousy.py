@@ -801,8 +801,17 @@ class TestCase(unittest.TestCase):
 			raise self.failureException(failmsg)
 
 	def setUp(self):
-		self.setUp2()
-		self.setUp1()
+		try:
+			self.setUp2()
+			try:
+				self.setUp1()
+			except Exception as e:
+				self.tearDown1()
+				raise e
+		except Exception as e:
+			self.tearDown2()
+			raise e
+
 		self.timing.setUp()
 
 	def setUp1(self):
