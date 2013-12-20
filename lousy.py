@@ -48,6 +48,25 @@ class FrameBufferCell(object):
 	def __init__(self):
 		pass
 
+	def __eq__(self, other):
+		return False
+		if self.char != other.char:
+			return False
+
+		if self.attributes != other.attributes:
+			return False
+
+		return True
+
+	def __ne__(self, other):
+		return not self.__eq__(other)
+
+class FrameBuffer(object):
+	'''Opaque class to contain a framebuffer snapshot'''
+
+	def __init__(self, framebuffer):
+		self._framebuffer = framebuffer
+
 class DumbTerminal(object):
 	'''Base class for all the emulated terminals'''
 
@@ -443,7 +462,7 @@ class Vtty(object):
 		'''
 		if _debug:
 			self.emulation.dumpFrameBuffer()
-		return copy.deepcopy(self.emulation.framebuffer)
+		return FrameBuffer(copy.deepcopy(self.emulation.framebuffer))
 
 class ProcessPipe(object):
 	'''File object to interact with processes.
@@ -746,6 +765,38 @@ class TestCase(unittest.TestCase):
 	# Setting changable by subclasses for whether the tests will output verbosely or not. The
 	# output of the test runner will be modified as appropriate to make it easier to read.
 	verbose_output = False
+
+	def __init__(self, methodName='runTest'):
+		unittest.TestCase.__init__(self, methodName)
+
+		self.addTypeEqualityFunc(type(FrameBuffer('')), self._assertEqual_FrameBuffer)
+
+	def _assertEqual_FrameBuffer(self, a, b, msg=None):
+		a = a._framebuffer
+		b = b._framebuffer
+
+		failmsg = ''
+		errors = 0
+		max_errors = 10
+
+		if len(a) != len(b) or len(a[0]) != len(b[0]):
+			raise self.failureException('Framebuffer sizes do not match (%d x %d) vs (%d x %d): %s' %
+					(len(a), len(a[0]), len(b), len(b[0]), msg))
+
+		for row in range(len(a)):
+			for col in range(len(a[row])):
+				if a[row][col] != b[row][col] and errors < max_errors:
+					failmsg += '(%d, %d) "%s" != "%s"; ' % (row, col, a[row][col].char, b[row][col].char)
+					errors += 1
+
+		if errors >= max_errors:
+			failmsg += '(other errors elided)'
+
+		if failmsg != '':
+			if msg is not None:
+				failmsg += ': %s' % msg
+
+			raise self.failureException(failmsg)
 
 	def setUp(self):
 		self.setUp2()
