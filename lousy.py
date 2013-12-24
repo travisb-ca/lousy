@@ -49,7 +49,6 @@ class FrameBufferCell(object):
 		pass
 
 	def __eq__(self, other):
-		return False
 		if self.char != other.char:
 			return False
 
