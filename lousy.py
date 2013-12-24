@@ -771,6 +771,10 @@ class TestCase(unittest.TestCase):
 	def __init__(self, methodName='runTest'):
 		unittest.TestCase.__init__(self, methodName)
 
+		self.tearDown1Called = None
+		self.tearDown2Called = None
+		self.addCleanup(self.tearDown)
+
 		self.addTypeEqualityFunc(type(FrameBuffer('')), self._assertEqual_FrameBuffer)
 
 	def _assertEqual_FrameBuffer(self, a, b, msg=None):
@@ -801,16 +805,11 @@ class TestCase(unittest.TestCase):
 			raise self.failureException(failmsg)
 
 	def setUp(self):
-		try:
-			self.setUp2()
-			try:
-				self.setUp1()
-			except Exception as e:
-				self.tearDown1()
-				raise e
-		except Exception as e:
-			self.tearDown2()
-			raise e
+		self.tearDown2Called = False
+		self.setUp2()
+
+		self.tearDown1Called = False
+		self.setUp1()
 
 		self.timing.setUp()
 
@@ -833,11 +832,14 @@ class TestCase(unittest.TestCase):
 	def tearDown(self):
 		self.timing.tearDown()
 		try:
-			self.tearDown1()
+			if self.tearDown1Called is False:
+				self.tearDown1()
 		except Exception as e:
-			self.tearDown2()
+			if self.tearDown2Called is False:
+				self.tearDown2()
 			raise e
-		self.tearDown2()
+		if self.tearDown2Called is False:
+			self.tearDown2()
 
 	def tearDown1(self):
 		'''tearDown method for the bottom level test class to use. This should be implemented in the test case class
