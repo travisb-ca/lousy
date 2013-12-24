@@ -61,6 +61,9 @@ class FrameBufferCell(object):
 	def __ne__(self, other):
 		return not self.__eq__(other)
 
+	def __str__(self):
+		return '%s' % _escapeAscii(self.char)
+
 class FrameBuffer(object):
 	'''Opaque class to contain a framebuffer snapshot'''
 
@@ -792,7 +795,7 @@ class TestCase(unittest.TestCase):
 		for row in range(len(a)):
 			for col in range(len(a[row])):
 				if a[row][col] != b[row][col] and errors < max_errors:
-					failmsg += '(%d, %d) "%s" != "%s"; ' % (row, col, a[row][col].char, b[row][col].char)
+					failmsg += '(%d, %d) "%s" != "%s"; ' % (row, col, a[row][col], b[row][col])
 					errors += 1
 
 		if errors >= max_errors:
