@@ -222,16 +222,16 @@ class DumbTerminal(object):
 	def i_normal_tab(self, cell, c):
 		# Emulate fixed tab stops
 
-		# If the tabstop would move beyond the edge of the
-		# screen and overwrite the last character don't
-		# write it.
-		if self.current_col != self.cols - 1:
-			cell.char = '\t'
-
 		tabstop = int((self.current_col + self.tabstop)/self.tabstop) * self.tabstop
 		if tabstop >= self.cols:
 			tabstop = self.cols - 1
 
+		# If the tabstop would move beyond the edge of the
+		# screen and overwrite the last character don't
+		# write it.
+		for i in range(self.current_col, min(tabstop, self.cols - 1)):
+				cell = self.cell(self.current_row, i)
+				cell.char = ' '
 		self.current_col = tabstop
 
 	def i_normal_newline(self, cell, c):

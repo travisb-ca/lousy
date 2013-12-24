@@ -89,12 +89,10 @@ class DumbTerminalTests(TerminalTestCase):
 		for i in range(self.vty.cols):
 			if i % self.vty.tabstop == 0:
 				self.assertCellChar(0, i, s[i / self.vty.tabstop])
-			elif i % self.vty.tabstop == 1:
-				self.assertCellChar(0, i, '\t')
 			elif i == self.vty.cols - 1:
 				self.assertCellChar(0, i, overwrite_char)
 			else:
-				self.assertCellChar(0, i, '')
+				self.assertCellChar(0, i, ' ')
 
 	def test_ignoreOtherControlChars(self):
 		for i in range(self.vty.cols):
