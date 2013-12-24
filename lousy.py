@@ -347,6 +347,7 @@ class VT100(DumbTerminal):
 	def __init__(self):
 		self.rows = 24
 		self.cols = 80
+		self.autowrap = False
 
 		DumbTerminal.__init__(self)
 
