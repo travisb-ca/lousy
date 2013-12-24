@@ -725,7 +725,7 @@ class Process(object):
 		for i in range(len(regexes)):
 			if _debug and line != '':
 				print 'checking "%s" against "%s"' % (regexes[i], _escapeAscii(line))
-			if re.match(regexes[i], line) is not None:
+			if re.search(regexes[i], line) is not None:
 				return i
 		return -1
 
