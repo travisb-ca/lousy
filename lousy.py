@@ -27,6 +27,10 @@ import select
 import re
 import collections
 import copy
+import asyncore
+import threading
+import socket
+import struct
 import pprint
 
 # A hack to allow us to pass the debug setting from lousy as a script to lousy as a library
@@ -34,6 +38,9 @@ try:
 	_debug = unittest._lousy_debug
 except:
 	pass
+
+DEFAULT_PORT = 12345
+MSG_HEADER_FMT = '!L'
 
 class FrameBufferCell(object):
 	'''Class which tracks the value and attributes of a character cell in the
@@ -766,6 +773,76 @@ class Process(object):
 
 		return -1
 
+def _readStubMessage(sock):
+	'''Given the socket read the next stub message and return it to be parsed.
+
+	   The message format is simple, first a four byte integer with the
+	   length of the message, then the message itself of that length.
+	'''
+	len = sock.recv(struct.calcsize(MSG_HEADER_FMT))
+	len = struct.unpack(MSG_HEADER_FMT, len)
+
+	msg = sock.recv(len)
+	return msg
+
+class Stub(asyncore.dispatcher):
+	'''This is the base class of the Stub objects. It is intended that a
+	   user will subclass this to add the methods they wish to stub out
+	   with the logic to do so.
+	'''
+	in_buf = []
+	out_buf = []
+
+	def writable(self):
+		if len(out_buf) > 0:
+			return True
+		else:
+			return False
+
+	def handle_write(self):
+		if len(out_buf) == 0:
+				return
+
+		self.send(struct.pack(MSG_HEADER_FMT, len(self.out_buf[0])))
+		bytes_sent = self.send(self.out_buf[0])
+		if bytes_sent == len(self.out_buf[0]):
+			del self.out_buf[0]
+		else:
+			self.out_buf[0] = self.out_buf[0][bytes_sent:]
+
+	def handle_read(self):
+		msg = _readStubMessage(self.socket)
+		self.in_buf.append(msg)
+
+class SimpleStub(Stub):
+	'''This is a Stub which acts as a dumb, asynchrounous datapipe. 
+	   It will store any messages received from the far end stub until a
+	   read() call is provided. Literal text is sent to the far end using
+	   the write() method.
+
+	   Each call will return a single message. If there are more messages
+	   then subsequent read()/write() calls are required.
+	   '''
+
+	def read(self):
+		'''Read the next message sent by the far side of the stub.
+		Returns an empty string if nothing was received.
+		'''
+		if len(self.in_buf) == 0:
+		   return ''
+
+		buf = self.in_buf[0]
+		del self.in_buf[0]
+
+		return buf
+
+	def write(self, msg):
+		'''Add the given message to be sent to the far side stub
+		as soon as possible.
+		'''
+		self.out_buf.append(msg)
+		self.stubcentral.trigger()
+
 class TestCase(unittest.TestCase):
 	# Setting changable by subclasses for whether the tests will output verbosely or not. The
 	# output of the test runner will be modified as appropriate to make it easier to read.
@@ -981,6 +1058,123 @@ if __name__ == '__main__':
 	class TestRunner(unittest.TextTestRunner):
 		def _makeResult(self):
 			return TestResult()
+
+	class StubListener(asyncore.dispatcher):
+		# This is a class which listens for new stub connections
+		def __init__(self, stubcentral):
+			asyncore.dispatcher.__init__(self)
+
+			self.stub = stubcentral
+
+			self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+			self.port = DEFAULT_PORT
+			while True:
+				try:
+					self.bind(('localhost', self.port))
+					break
+				except:
+					self.port += 1
+			self.listen(5)
+
+		def handle_accept(self):
+			sock, address = self.accept()
+			self.stub._new_stub(sock)
+
+	class StubPoker(asyncore.dispatcher):
+		# This is dispatcher used to get out of the select loop. It
+		# uses a pair of sockets to be portable
+
+		def __init__(self):
+			self.s1, self.s2 = socket.socketpair()
+
+			asyncore.dispatcher.__init__(sock = self.s1)
+
+		def writable(self):
+			return False
+
+		def handle_read(self):
+			# Throw away the data since it doesn't matter and has served its purpose
+			s = self.recv(100)
+
+		def trigger(self):
+			self.s2.send('a')
+
+	class StubCentral(threading.Thread):
+		'''This is an asyncore based server which provides a TCP
+		   based method to control external programs. The intended
+		   usecase is to have written stub classes/functions in the
+		   language of the application being tested and use some
+		   simple stub functionality to control that from the test
+		   framework. This is the central clearing house for
+		   registering, creating and finding Stub object.
+		'''
+
+		lock = None
+		port = None
+		listener = None
+		poker = None
+		classes = {}
+		objects = {}
+		running = True
+
+		def __init__(self):
+			threading.Thread.__init__(self, name='StubListener')
+
+			lock = threading.Lock()
+
+		def _init(self):
+			self.listener = StubListener(self)
+			self.port = self.listener.port
+			self.poker = StubPoker()
+
+		def _new_stub(self, sock):
+			# Handle a new connection and create an object of
+			# the appropriate stub class.
+			msg = _readStubMessage(sock)
+
+			type, id = msg.split(',')
+
+			if id in self.objects:
+				print 'Error: Stub object "%s" of type "%s" already exists' % (id, type)
+
+			if type in self.classes:
+				stub = self.classes[type](sock)
+			else:
+				# Unknown type, create a simple stub
+				stub = SimpleStub(sock)
+
+			stub.stubcentral = self
+
+		def trigger(self):
+			# We've been triggered, so we need to exit the
+			# select loop and reprocess.
+			self.poker.trigger()
+
+		def stop(self):
+			self.lock.acquire()
+			self.running = False
+			self.lock.release()
+
+			self.trigger()
+
+		def run(self):
+			# We don't create the socket until we are run
+			# because many tests won't need the Stub at all and
+			# it'd be wasteful to create them otherwise.
+			self.lock.acquire()
+			if self.port is None:
+				self._init()
+
+			self.running = True
+			self.lock.release()
+
+			still_running = self.True
+			while still_running:
+				asyncore.loop(timeout=5, use_poll=True)
+
+				self.lock.acquire()
+				still_running = self.running
+				self.lock.release()
 
 	# Given a TestSuite of TestSuits of TestClasses, return a list of only those tests whose ID
 	# matches the given regex.
