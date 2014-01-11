@@ -1118,7 +1118,7 @@ if __name__ == '__main__':
 		running = True
 
 		def __init__(self):
-			threading.Thread.__init__(self, name='StubListener')
+			threading.Thread.__init__(self, name='StubCentral')
 
 			lock = threading.Lock()
 
