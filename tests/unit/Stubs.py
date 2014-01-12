@@ -22,3 +22,9 @@ class StubCentralTests(StubTestCase):
 		port = lousy.stubs.port()
 		sock = socket.create_connection(('localhost', port))
 		sock.close()
+
+	def test_connectSimpleStub(self):
+		port = lousy.stubs.port()
+		sock = socket.create_connection(('localhost', port))
+
+		self.send(sock, 'SimpleStub,id1')
