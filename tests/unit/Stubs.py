@@ -23,3 +23,5 @@ class StubCentralTests(StubTestCase):
 		sock = socket.create_connection(('localhost', port))
 
 		self.send(sock, 'SimpleStub,id1')
+
+		stub = lousy.stubs.newest()

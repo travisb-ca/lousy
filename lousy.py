@@ -1147,6 +1147,7 @@ if __name__ == '__main__':
 		_objects = {}
 		_running = True
 		_ready = None
+		_newest = None
 
 		def __init__(self):
 			threading.Thread.__init__(self, name='StubCentral')
@@ -1177,6 +1178,17 @@ if __name__ == '__main__':
 				stub = SimpleStub(sock)
 
 			stub.stubcentral = self
+
+			self._lock.acquire()
+			self._newest = stub
+			self._lock.release()
+
+		def newest(self):
+			self._lock.acquire()
+			stub = self._newest
+			self._lock.release()
+
+			return stub
 
 		def add_class(self, classname, class_obj):
 			'''Add a stub callback class. When a new stub
