@@ -33,14 +33,19 @@ import socket
 import struct
 import pprint
 
+DEFAULT_PORT = 12345
+MSG_HEADER_FMT = '!L'
+
 # A hack to allow us to pass the debug setting from lousy as a script to lousy as a library
 try:
 	_debug = unittest._lousy_debug
 except:
 	pass
 
-DEFAULT_PORT = 12345
-MSG_HEADER_FMT = '!L'
+try:
+	stubs = unittest._lousy_stubs
+except:
+	stubs = None
 
 class FrameBufferCell(object):
 	'''Class which tracks the value and attributes of a character cell in the
@@ -1221,6 +1226,11 @@ if __name__ == '__main__':
 			args.constrained = True
 
 		unittest._lousy_debug = args.debug
+
+		if stubs is None:
+			# This instance is run as a script, so ensure that
+			# lousy as a module has a copy of the StubCentral
+			unittest._lousy_stubs = StubCentral()
 
 		tests = unittest.TestSuite()
 
