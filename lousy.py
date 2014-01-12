@@ -816,6 +816,13 @@ class Stub(asyncore.dispatcher):
 			self.out_buf[0] = self.out_buf[0][bytes_sent:]
 
 	def handle_read(self):
+		ready = self.socket.recv(100, socket.MSG_PEEK)
+		if len(ready) < 4:
+			# Not enough data to decode yet, wait a bit
+			if not ready:
+				# socket was closed by the other end
+				self.close()
+			return
 		msg = _readStubMessage(self.socket)
 		self.in_buf.append(msg)
 
@@ -1082,7 +1089,9 @@ if __name__ == '__main__':
 			if len(buf) >= struct.calcsize(MSG_HEADER_FMT):
 				self.del_channel()
 				self.stub._new_stub(self.socket)
-
+			elif not buf:
+				# Socket has been closed by the far end
+				self.close()
 
 	class StubListener(asyncore.dispatcher):
 		# This is a class which listens for new stub connections
