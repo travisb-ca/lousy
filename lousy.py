@@ -784,10 +784,10 @@ def _readStubMessage(sock):
 	   The message format is simple, first a four byte integer with the
 	   length of the message, then the message itself of that length.
 	'''
-	len = sock.recv(struct.calcsize(MSG_HEADER_FMT))
-	len = struct.unpack(MSG_HEADER_FMT, len)
+	buf = sock.recv(struct.calcsize(MSG_HEADER_FMT))
+	size = struct.unpack(MSG_HEADER_FMT, buf)[0]
 
-	msg = sock.recv(len)
+	msg = sock.recv(size)
 	return msg
 
 class Stub(asyncore.dispatcher):
@@ -799,13 +799,13 @@ class Stub(asyncore.dispatcher):
 	out_buf = []
 
 	def writable(self):
-		if len(out_buf) > 0:
+		if len(self.out_buf) > 0:
 			return True
 		else:
 			return False
 
 	def handle_write(self):
-		if len(out_buf) == 0:
+		if len(self.out_buf) == 0:
 				return
 
 		self.send(struct.pack(MSG_HEADER_FMT, len(self.out_buf[0])))
@@ -1064,6 +1064,26 @@ if __name__ == '__main__':
 		def _makeResult(self):
 			return TestResult()
 
+	class ProtoStub(asyncore.dispatcher):
+		# This is a stub connection after the new socket has been
+		# accept()ed from StubListener, but before any data has been
+		# read which will let us determine the stub class to
+		# instantiate.
+
+		def writable(self):
+			return False
+
+		def handle_read(self):
+			# Remove ourself from the global list of sockets to
+			# watch and send our socket to StubCentral to be
+			# reborn as a new Stub class according to its type.
+			buf = self.socket.recv(100, socket.MSG_PEEK)
+
+			if len(buf) >= struct.calcsize(MSG_HEADER_FMT):
+				self.del_channel()
+				self.stub._new_stub(self.socket)
+
+
 	class StubListener(asyncore.dispatcher):
 		# This is a class which listens for new stub connections
 		def __init__(self, stubcentral):
@@ -1083,7 +1103,12 @@ if __name__ == '__main__':
 
 		def handle_accept(self):
 			sock, address = self.accept()
-			self.stub._new_stub(sock)
+			protostub = ProtoStub(sock)
+			protostub.stub = self.stub
+
+
+		def writable(self):
+			return False
 
 	class StubPoker(asyncore.dispatcher):
 		# This is dispatcher used to get out of the select loop. It
