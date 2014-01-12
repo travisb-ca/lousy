@@ -1176,7 +1176,8 @@ if __name__ == '__main__':
 			self._running = False
 			self._lock.release()
 
-			self.trigger()
+			if self.is_alive():
+				self.trigger()
 
 		def ready(self):
 			'''Ensure that the stub protocol is ready for use.
