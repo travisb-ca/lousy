@@ -1121,16 +1121,19 @@ if __name__ == '__main__':
 		_classes = {}
 		_objects = {}
 		_running = True
+		_ready = None
 
 		def __init__(self):
 			threading.Thread.__init__(self, name='StubCentral')
 
 			self._lock = threading.Lock()
+			self._ready = threading.Event()
 
 		def _init(self):
 			self._listener = StubListener(self)
 			self._port = self._listener.port
 			self._poker = StubPoker()
+			self._ready.set()
 
 		def _new_stub(self, sock):
 			# Handle a new connection and create an object of
@@ -1178,8 +1181,9 @@ if __name__ == '__main__':
 		def ready(self):
 			'''Ensure that the stub protocol is ready for use.
 			'''
-			if not self.is_alive():
+			if not self._ready.is_set():
 				self.start()
+				self._ready.wait()
 
 		def port(self):
 			'''Return the port needed to connect stubs to this
