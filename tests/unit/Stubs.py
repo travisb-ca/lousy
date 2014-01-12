@@ -18,7 +18,7 @@ class StubCentralTests(StubTestCase):
 	def test_stubCentralGetsReady(self):
 		self.assertIsNotNone(lousy.stubs.port())
 
-	def test_connectSimpleStub(self):
+	def test_connectStubNoInit(self):
 		port = lousy.stubs.port()
 		sock = socket.create_connection(('localhost', port))
 		sock.close()
