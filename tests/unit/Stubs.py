@@ -10,4 +10,4 @@ class StubCentralTests(StubTestCase):
 		self.assertIsNotNone(lousy.stubs)
 
 	def test_stubCentralGetsReady(self):
-		print lousy.stubs.port()
+		self.assertIsNotNone(lousy.stubs.port())
