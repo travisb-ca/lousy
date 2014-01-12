@@ -1092,7 +1092,7 @@ if __name__ == '__main__':
 		def __init__(self):
 			self.s1, self.s2 = socket.socketpair()
 
-			asyncore.dispatcher.__init__(sock = self.s1)
+			asyncore.dispatcher.__init__(self, sock = self.s1)
 
 		def writable(self):
 			return False
@@ -1114,23 +1114,23 @@ if __name__ == '__main__':
 		   registering, creating and finding Stub object.
 		'''
 
-		lock = None
-		port = None
-		listener = None
-		poker = None
-		classes = {}
-		objects = {}
-		running = True
+		_lock = None
+		_port = None
+		_listener = None
+		_poker = None
+		_classes = {}
+		_objects = {}
+		_running = True
 
 		def __init__(self):
 			threading.Thread.__init__(self, name='StubCentral')
 
-			lock = threading.Lock()
+			self._lock = threading.Lock()
 
 		def _init(self):
-			self.listener = StubListener(self)
-			self.port = self.listener.port
-			self.poker = StubPoker()
+			self._listener = StubListener(self)
+			self._port = self._listener.port
+			self._poker = StubPoker()
 
 		def _new_stub(self, sock):
 			# Handle a new connection and create an object of
@@ -1139,47 +1139,74 @@ if __name__ == '__main__':
 
 			type, id = msg.split(',')
 
-			if id in self.objects:
+			if id in self._objects:
 				print 'Error: Stub object "%s" of type "%s" already exists' % (id, type)
 
-			if type in self.classes:
-				stub = self.classes[type](sock)
+			if type in self._classes:
+				stub = self._classes[type](sock)
 			else:
 				# Unknown type, create a simple stub
 				stub = SimpleStub(sock)
 
 			stub.stubcentral = self
 
+		def add_class(self, classname, class_obj):
+			'''Add a stub callback class. When a new stub
+			   registers itself with lousy if the class name
+			   exists then the created object will be created
+			   with that class instead of SimpleStub.
+
+			   This method can also be used to reset the class to
+			   use. This is useful if you have multiple tests
+			   which use the same stubs but you want different
+			   mock objects for each test.
+			'''
+			self._classes[classname] = class_obj
+
 		def trigger(self):
 			# We've been triggered, so we need to exit the
 			# select loop and reprocess.
-			self.poker.trigger()
+			self._poker.trigger()
 
 		def stop(self):
-			self.lock.acquire()
-			self.running = False
-			self.lock.release()
+			self._lock.acquire()
+			self._running = False
+			self._lock.release()
 
 			self.trigger()
+
+		def ready(self):
+			'''Ensure that the stub protocol is ready for use.
+			'''
+			if not self.is_alive():
+				self.start()
+
+		def port(self):
+			'''Return the port needed to connect stubs to this
+			   instance of lousy. This port will always be bound
+			   to IPv4 localhost on the specified port.
+			'''
+			self.ready()
+			return self._port
 
 		def run(self):
 			# We don't create the socket until we are run
 			# because many tests won't need the Stub at all and
 			# it'd be wasteful to create them otherwise.
-			self.lock.acquire()
-			if self.port is None:
+			self._lock.acquire()
+			if self._port is None:
 				self._init()
 
-			self.running = True
-			self.lock.release()
+			self._running = True
+			self._lock.release()
 
-			still_running = self.True
+			still_running = True
 			while still_running:
 				asyncore.loop(timeout=5, use_poll=True)
 
-				self.lock.acquire()
-				still_running = self.running
-				self.lock.release()
+				self._lock.acquire()
+				still_running = self._running
+				self._lock.release()
 
 	# Given a TestSuite of TestSuits of TestClasses, return a list of only those tests whose ID
 	# matches the given regex.

@@ -8,3 +8,6 @@ class StubTestCase(lousy.TestCase):
 class StubCentralTests(StubTestCase):
 	def test_testCanAccessStubCentral(self):
 		self.assertIsNotNone(lousy.stubs)
+
+	def test_stubCentralGetsReady(self):
+		print lousy.stubs.port()
