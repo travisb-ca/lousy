@@ -1206,7 +1206,7 @@ if __name__ == '__main__':
 
 			still_running = True
 			while still_running:
-				asyncore.loop(timeout=5, use_poll=True)
+				asyncore.loop(timeout=5, use_poll=True, count=1)
 
 				self._lock.acquire()
 				still_running = self._running
@@ -1287,6 +1287,8 @@ if __name__ == '__main__':
 
 		runner = TestRunner()
 		runner.run(tests)
+
+		unittest._lousy_stubs.stop()
 
 		return True
 
