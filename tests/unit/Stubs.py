@@ -53,7 +53,7 @@ class SimpleStubTests(StubTestCase):
 		'''Get the latest messge from the stub and return it as a string
 		'''
 		size = self.sock.recv(4)
-		size = struct.unpack(lousy.MSG_HEADER_FMT, size)
+		size = struct.unpack(lousy.MSG_HEADER_FMT, size)[0]
 
 		buf = self.sock.recv(size)
 
@@ -64,4 +64,11 @@ class SimpleStubTests(StubTestCase):
 		self.send(s)
 
 		t = self.stub.read()
+		self.assertEqual(s, t)
+
+	def test_readFromStub(self):
+		s = 'This is a test'
+		self.stub.write(s)
+
+		t = self.recv()
 		self.assertEqual(s, t)
