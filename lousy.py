@@ -1198,13 +1198,21 @@ if __name__ == '__main__':
 			if id in self._objects:
 				print 'Error: Stub object "%s" of type "%s" already exists' % (id, type)
 
-			if type in self._classes:
-				stub = self._classes[type](sock)
+			create_callback = None
+			if type in self._classes :
+				constructor, create_callback = self._classes[type]
+				constructor(sock)
 			else:
 				# Unknown type, create a simple stub
 				stub = SimpleStub(sock)
+				if 'default' in self._classes:
+					_, create_callback = self._classes['default']
+					type = 'SimpleStub'
 
 			stub.stubcentral = self
+
+			if create_callback is not None:
+				create_callback(stub, type)
 
 			self._lock.acquire()
 			self._newest = stub
@@ -1217,18 +1225,33 @@ if __name__ == '__main__':
 
 			return stub
 
-		def add_class(self, classname, class_obj):
+		def add_class(self, classname, class_obj, create_callback=None):
 			'''Add a stub callback class. When a new stub
 			   registers itself with lousy if the class name
 			   exists then the created object will be created
 			   with that class instead of SimpleStub.
+
+			   create_callback is called, if not None, when a new
+			   instance of the given class object is created.
+			   This allows the test to acknowledge the creation
+			   and start interacting with the new object. This
+			   callable is called with the new object as the first
+			   argument and the classname string as the second. A
+			   special argument of 'default' can be used with
+			   None as the class_obj to set the callback called
+			   when a SimpleStub is created. In this case
+			   'SimpleStub' will be the type string returned to
+			   the (optional) callback.
 
 			   This method can also be used to reset the class to
 			   use. This is useful if you have multiple tests
 			   which use the same stubs but you want different
 			   mock objects for each test.
 			'''
-			self._classes[classname] = class_obj
+			if classname == 'SimpleStub':
+				self._classes[classname] = (SimpleStub, create_callback)
+			else:
+				self._classes[classname] = (class_obj, create_callback)
 
 		def trigger(self):
 			# We've been triggered, so we need to exit the

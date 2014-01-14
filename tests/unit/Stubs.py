@@ -3,6 +3,7 @@
 import lousy
 import socket
 import struct
+import threading
 
 def send(sock, msg):
 	'''Send the given message to the stub as the far end
@@ -30,6 +31,32 @@ class StubCentralTests(StubTestCase):
 		sock = socket.create_connection(('localhost', port))
 
 		send(sock, 'SimpleStub,id1')
+
+	def callback_SimpleStub(self, stub, type):
+		self.stub = stub
+		self.type = type
+		self.ready.set()
+
+	def test_defaultStubCallback(self):
+		self.ready = threading.Event()
+		self.stub = None
+		self.type = ''
+
+		lousy.stubs.add_class('default', None, self.callback_SimpleStub)
+
+		port = lousy.stubs.port()
+		sock = socket.create_connection(('localhost', port))
+
+		self.assertIsNone(self.stub)
+
+		send(sock, 'SimpleStub,id2')
+
+		self.ready.wait(5)
+
+		self.assertIsNotNone(self.stub)
+		self.assertEqual(self.type, 'SimpleStub')
+
+		sock.close()
 
 class SimpleStubTests(StubTestCase):
 	def setUp1(self):
