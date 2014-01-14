@@ -58,6 +58,22 @@ class StubCentralTests(StubTestCase):
 
 		sock.close()
 
+	def test_nonExistentStubCallback(self):
+		self.ready = threading.Event()
+		self.stub = None
+		self.type = ''
+
+		lousy.stubs.add_class('default', None, self.callback_SimpleStub)
+
+		sock = self.createStub('StubClassWhichDoesntExist')
+
+		self.ready.wait(5)
+
+		self.assertIsNotNone(self.stub)
+		self.assertEqual(self.type, 'SimpleStub')
+
+		sock.close()
+
 class SimpleStubTests(StubTestCase):
 	def setUp1(self):
 		port = lousy.stubs.port()
