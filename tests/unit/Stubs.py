@@ -21,16 +21,21 @@ class StubCentralTests(StubTestCase):
 	def test_stubCentralGetsReady(self):
 		self.assertIsNotNone(lousy.stubs.port())
 
+	def createStub(self, classname):
+		port = lousy.stubs.port()
+		sock = socket.create_connection(('localhost', port))
+
+		send(sock, '%s,id1' % classname)
+
+		return sock
+
 	def test_connectStubNoInit(self):
 		port = lousy.stubs.port()
 		sock = socket.create_connection(('localhost', port))
 		sock.close()
 
 	def test_connectSimpleStub(self):
-		port = lousy.stubs.port()
-		sock = socket.create_connection(('localhost', port))
-
-		send(sock, 'SimpleStub,id1')
+		sock = self.createStub('SimpleStub')
 
 	def callback_SimpleStub(self, stub, type):
 		self.stub = stub
@@ -44,12 +49,7 @@ class StubCentralTests(StubTestCase):
 
 		lousy.stubs.add_class('default', None, self.callback_SimpleStub)
 
-		port = lousy.stubs.port()
-		sock = socket.create_connection(('localhost', port))
-
-		self.assertIsNone(self.stub)
-
-		send(sock, 'SimpleStub,id2')
+		sock = self.createStub('SimpleStub')
 
 		self.ready.wait(5)
 
