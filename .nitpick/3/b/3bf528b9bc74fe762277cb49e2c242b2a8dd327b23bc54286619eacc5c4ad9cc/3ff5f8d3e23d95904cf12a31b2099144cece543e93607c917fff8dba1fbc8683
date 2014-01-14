@@ -1,0 +1,8 @@
+Attachment: 
+Attachment-filename: 
+Attachment-type: application/octet-stream
+Date: 2014-01-14 05:33:29
+Parent: issue
+User: travisb@travisbrown.ca
+--
+At this point I have a basic stub protocol, but it isn't really useful for mocking objects yet.
