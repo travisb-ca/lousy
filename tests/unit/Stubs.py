@@ -30,3 +30,38 @@ class StubCentralTests(StubTestCase):
 		sock = socket.create_connection(('localhost', port))
 
 		send(sock, 'SimpleStub,id1')
+
+class SimpleStubTests(StubTestCase):
+	def setUp1(self):
+		port = lousy.stubs.port()
+		self.sock = socket.create_connection(('localhost', port))
+
+		send(self.sock, 'SimpleStub,id1')
+
+		self.stub = lousy.stubs.newest()
+		while self.stub is None:
+			self.stub = lousy.stubs.newest()
+
+	def tearDown1(self):
+		if self.sock:
+			self.sock.close()
+
+	def send(self, msg):
+		send(self.sock, msg)
+
+	def recv(self):
+		'''Get the latest messge from the stub and return it as a string
+		'''
+		size = self.sock.recv(4)
+		size = struct.unpack(lousy.MSG_HEADER_FMT, size)
+
+		buf = self.sock.recv(size)
+
+		return buf
+
+	def test_writeToStub(self):
+		s = 'This is a test'
+		self.send(s)
+
+		t = self.stub.read()
+		self.assertEqual(s, t)
