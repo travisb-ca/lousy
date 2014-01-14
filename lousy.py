@@ -797,6 +797,13 @@ class Stub(asyncore.dispatcher):
 	'''
 	in_buf = []
 	out_buf = []
+	read_ready = None # Is there data to be read
+	lock = None
+
+	def __init__(self, sock=None, map=None):
+		asyncore.dispatcher.__init__(self, sock, map)
+		self.read_ready = threading.Event()
+		self.lock = threading.Lock()
 
 	def writable(self):
 		if len(self.out_buf) > 0:
@@ -823,8 +830,13 @@ class Stub(asyncore.dispatcher):
 				# socket was closed by the other end
 				self.close()
 			return
+
+		self.lock.acquire()
 		msg = _readStubMessage(self.socket)
+
 		self.in_buf.append(msg)
+		self.read_ready.set()
+		self.lock.release()
 
 class SimpleStub(Stub):
 	'''This is a Stub which acts as a dumb, asynchrounous datapipe. 
@@ -836,15 +848,21 @@ class SimpleStub(Stub):
 	   then subsequent read()/write() calls are required.
 	   '''
 
-	def read(self):
+	def read(self, timeout=5):
 		'''Read the next message sent by the far side of the stub.
 		Returns an empty string if nothing was received.
 		'''
+		self.read_ready.wait(timeout)
+		self.lock.acquire()
+
 		if len(self.in_buf) == 0:
-		   return ''
+			self.lock.release()
+			return ''
 
 		buf = self.in_buf[0]
 		del self.in_buf[0]
+		self.read_ready.clear()
+		self.lock.release()
 
 		return buf
 
