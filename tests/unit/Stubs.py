@@ -4,12 +4,14 @@ import lousy
 import socket
 import struct
 
+def send(sock, msg):
+	'''Send the given message to the stub as the far end
+	'''
+	buf = struct.pack(lousy.MSG_HEADER_FMT, len(msg))
+	return sock.send(buf + msg)
+
 class StubTestCase(lousy.TestCase):
-	def send(self, sock, msg):
-		'''Send the given message to the stub as the far end
-		'''
-		buf = struct.pack(lousy.MSG_HEADER_FMT, len(msg))
-		return sock.send(buf + msg)
+	pass
 
 class StubCentralTests(StubTestCase):
 	def test_testCanAccessStubCentral(self):
@@ -27,4 +29,4 @@ class StubCentralTests(StubTestCase):
 		port = lousy.stubs.port()
 		sock = socket.create_connection(('localhost', port))
 
-		self.send(sock, 'SimpleStub,id1')
+		send(sock, 'SimpleStub,id1')
