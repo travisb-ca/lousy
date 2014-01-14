@@ -1,0 +1,18 @@
+Component: Test_Runner
+Date: 2014-01-14 05:08:16
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Eventually
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Major
+State: Open
+Title: Test timeouts
+Type: Feature
+Units_of_Work: 1000
+--
+It'd be nice to be able to specify a timeout for any particular test such that any long running tests don't have to add that infrastructure themselves. I'm not sure exactly how I could accomplish this. There doesn't seem to be any trivial way of cancelling a thread, they seem to only be able to voluntarily terminate.
