@@ -838,19 +838,6 @@ class Stub(asyncore.dispatcher):
 		self.read_ready.set()
 		self.lock.release()
 
-class SimpleStub(Stub):
-	'''This is a Stub which acts as a dumb, asynchrounous datapipe. 
-	   It will store any messages received from the far end stub until a
-	   read() call is provided. Literal text is sent to the far end using
-	   the write() method.
-
-	   Each call will return a single message. If there are more messages
-	   then subsequent read()/write() calls are required.
-
-	   You shouldn't really inherit from this class.
-	   '''
-	type = 'SimpleStub'
-
 	def read(self, timeout=5):
 		'''Read the next message sent by the far side of the stub.
 		Returns an empty string if nothing was received.
@@ -875,6 +862,19 @@ class SimpleStub(Stub):
 		'''
 		self.out_buf.append(msg)
 		self.stubcentral.trigger()
+
+class SimpleStub(Stub):
+	'''This is a Stub which acts as a dumb, asynchrounous datapipe. 
+	   It will store any messages received from the far end stub until a
+	   read() call is provided. Literal text is sent to the far end using
+	   the write() method.
+
+	   Each call will return a single message. If there are more messages
+	   then subsequent read()/write() calls are required.
+
+	   You shouldn't really inherit from this class.
+	   '''
+	type = 'SimpleStub'
 
 class TestCase(unittest.TestCase):
 	# Setting changable by subclasses for whether the tests will output verbosely or not. The
