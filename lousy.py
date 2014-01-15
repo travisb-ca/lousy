@@ -838,9 +838,24 @@ class Stub(asyncore.dispatcher):
 		self.lock.acquire()
 		msg = _readStubMessage(self.socket)
 
-		self.in_buf.append(msg)
-		self.read_ready.set()
+		if not self.consume_read(msg):
+			self.in_buf.append(msg)
+			self.read_ready.set()
+
 		self.lock.release()
+
+	def consume_read(self, msg):
+		'''This method is called when a message has been received. If
+		   this method returns False then the message will be queued
+		   on the internal queue waiting for a read() call. True and
+		   the message will be discarded under the assumption that
+		   the Stub class has handled the message appropriately.
+
+		   The intention is that a Stub which has intelligence may
+		   interpret the message and provide a response without
+		   waiting for the test input if appropriate.
+		'''
+		return False
 
 	def read(self, timeout=5):
 		'''Read the next message sent by the far side of the stub.
