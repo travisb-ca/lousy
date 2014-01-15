@@ -846,6 +846,8 @@ class SimpleStub(Stub):
 
 	   Each call will return a single message. If there are more messages
 	   then subsequent read()/write() calls are required.
+
+	   You shouldn't really inherit from this class.
 	   '''
 	type = 'SimpleStub'
 
