@@ -794,6 +794,10 @@ class Stub(asyncore.dispatcher):
 	'''This is the base class of the Stub objects. It is intended that a
 	   user will subclass this to add the methods they wish to stub out
 	   with the logic to do so.
+
+	   When you subclass this be sure to set, either at initialization or
+	   as part of __init__, self.type to the string you intend to
+	   register this class for.
 	'''
 	in_buf = []
 	out_buf = []
@@ -1206,7 +1210,7 @@ if __name__ == '__main__':
 			create_callback = None
 			if type in self._classes :
 				constructor, create_callback = self._classes[type]
-				constructor(sock)
+				stub = constructor(sock)
 			else:
 				# Unknown type, create a simple stub
 				stub = SimpleStub(sock)
