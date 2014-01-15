@@ -74,6 +74,29 @@ class StubCentralTests(StubTestCase):
 
 		sock.close()
 
+	def test_waitForStub(self):
+		sock = self.createStub('SimpleStub')
+
+		stub = lousy.stubs.waitForStub()
+
+		self.assertIsNotNone(stub)
+		self.assertEqual(stub.type, 'SimpleStub')
+
+	def test_waitForStubWithType(self):
+		sock = self.createStub('SimpleStub')
+
+		stub = lousy.stubs.waitForStub('SimpleStub')
+
+		self.assertIsNotNone(stub)
+		self.assertEqual(stub.type, 'SimpleStub')
+
+	def test_waitForStubWithInvalidType(self):
+		sock = self.createStub('SimpleStub')
+
+		stub = lousy.stubs.waitForStub('NotSoSimpleStub', timeout=0.1)
+
+		self.assertIsNone(stub)
+
 class SimpleStubTests(StubTestCase):
 	def setUp1(self):
 		port = lousy.stubs.port()

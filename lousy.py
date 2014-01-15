@@ -847,6 +847,7 @@ class SimpleStub(Stub):
 	   Each call will return a single message. If there are more messages
 	   then subsequent read()/write() calls are required.
 	   '''
+	type = 'SimpleStub'
 
 	def read(self, timeout=5):
 		'''Read the next message sent by the far side of the stub.
@@ -1175,12 +1176,14 @@ if __name__ == '__main__':
 		_running = True
 		_ready = None
 		_newest = None
+		_stub_created = None
 
 		def __init__(self):
 			threading.Thread.__init__(self, name='StubCentral')
 
 			self._lock = threading.Lock()
 			self._ready = threading.Event()
+			self._stub_created = threading.Event()
 
 		def _init(self):
 			self._listener = StubListener(self)
@@ -1216,7 +1219,32 @@ if __name__ == '__main__':
 
 			self._lock.acquire()
 			self._newest = stub
+			self._stub_created.set()
 			self._lock.release()
+
+		def waitForStub(self, type=None, timeout=5):
+			'''Wait until the timeout expires or a stub of the
+			   given class is created. Return the object of that
+			   stub.
+
+			   If type is None then return the next stub to be
+			   created.
+			'''
+			startTime = time.time()
+
+			timeLeft = timeout - (time.time() - startTime)
+			while timeLeft > 0:
+				self._stub_created.wait(timeLeft)
+
+				with self._lock:
+					self._stub_created.clear()
+
+					if type is None:
+						return self._newest
+					elif self._newest.type == type:
+						return self._newest
+
+				timeLeft = timeLeft - (time.time() - startTime)
 
 		def newest(self):
 			self._lock.acquire()
