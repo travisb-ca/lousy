@@ -816,7 +816,11 @@ class Stub(asyncore.dispatcher):
 		else:
 			if self._disconnect:
 				self.del_channel()
+				self.close()
+
 			return False
+	def readable(self):
+		return not self._disconnect
 
 	def handle_write(self):
 		if len(self.out_buf) == 0:
