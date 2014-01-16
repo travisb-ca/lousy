@@ -457,6 +457,19 @@ class Vtty(object):
 	def cell(self, row, col):
 		return self.emulation.cell(row, col)
 
+	def string(self, row, col, size):
+		'''Return the string by reading from (row, col) rightwards
+		   size cells. Ignores attributes. If the cell is out of
+		   range nothing will be added to the returned string. Does
+		   not wrap around to get more characters.
+		'''
+		s = ''
+		for c in range(col, col + size):
+			cell = self.cell(row, c)
+			if cell is not None:
+				s += cell.char
+		return s
+
 	def cursorPosition(self):
 		'''Return the 2-tuple with the current cursor position'''
 		return (self.emulation.current_row, self.emulation.current_col)
