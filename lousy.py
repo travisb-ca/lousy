@@ -803,6 +803,7 @@ class Stub(asyncore.dispatcher):
 	out_buf = []
 	read_ready = None # Is there data to be read
 	lock = None
+	_disconnect = False
 
 	def __init__(self, sock=None, map=None):
 		asyncore.dispatcher.__init__(self, sock, map)
@@ -813,11 +814,16 @@ class Stub(asyncore.dispatcher):
 		if len(self.out_buf) > 0:
 			return True
 		else:
+			if self._disconnect:
+				self.del_channel()
 			return False
 
 	def handle_write(self):
 		if len(self.out_buf) == 0:
 				return
+
+		if _debug:
+			print 'Stub sending message "%s"' % self.out_buf[0]
 
 		self.send(struct.pack(MSG_HEADER_FMT, len(self.out_buf[0])))
 		bytes_sent = self.send(self.out_buf[0])
@@ -838,11 +844,18 @@ class Stub(asyncore.dispatcher):
 		self.lock.acquire()
 		msg = _readStubMessage(self.socket)
 
+		if _debug:
+			print 'Stub received message "%s"' % msg
+
 		if not self.consume_read(msg):
 			self.in_buf.append(msg)
 			self.read_ready.set()
 
 		self.lock.release()
+
+	def disconnect(self):
+		self._disconnect = True
+		self.stubcentral.trigger()
 
 	def consume_read(self, msg):
 		'''This method is called when a message has been received. If
@@ -879,6 +892,8 @@ class Stub(asyncore.dispatcher):
 		'''Add the given message to be sent to the far side stub
 		as soon as possible.
 		'''
+		if _debug:
+			print 'Stub adding message to write queue "%s"' % msg
 		self.out_buf.append(msg)
 		self.stubcentral.trigger()
 
