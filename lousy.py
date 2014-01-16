@@ -985,12 +985,15 @@ class TestCase(unittest.TestCase):
 		try:
 			if self.tearDown1Called is False:
 				self.tearDown1()
+				self.tearDown1Called = True
 		except Exception as e:
 			if self.tearDown2Called is False:
 				self.tearDown2()
+				self.tearDown2Called = True
 			raise e
 		if self.tearDown2Called is False:
 			self.tearDown2()
+			self.tearDown2Called = True
 
 	def tearDown1(self):
 		'''tearDown method for the bottom level test class to use. This should be implemented in the test case class
