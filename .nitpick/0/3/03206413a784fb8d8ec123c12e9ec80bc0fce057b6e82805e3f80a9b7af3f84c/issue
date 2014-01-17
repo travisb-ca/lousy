@@ -1,0 +1,18 @@
+Component: Test_Runner
+Date: 2014-01-17 03:47:45
+Depends_On: 
+Duplicate_Of: 
+Fix_By: 1.0
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Major
+State: Open
+Title: test_writeToStub takes 5 seconds if not run first
+Type: Bug
+Units_of_Work: 1000
+--
+For some unknown reason the Stubs.SimpleStubTests.test_writeToStub test runs nearly instantly if it is run alone or as the first test. However, if it doesn't run first or alone then it takes over 5 seconds.
