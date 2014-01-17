@@ -40,7 +40,7 @@ MSG_HEADER_FMT = '!L'
 try:
 	_debug = unittest._lousy_debug
 except:
-	pass
+	_debug = False
 
 try:
 	stubs = unittest._lousy_stubs
@@ -1429,6 +1429,8 @@ if __name__ == '__main__':
 			args.constrained = True
 
 		unittest._lousy_debug = args.debug
+		global _debug
+		_debug = args.debug
 
 		if stubs is None:
 			# This instance is run as a script, so ensure that
