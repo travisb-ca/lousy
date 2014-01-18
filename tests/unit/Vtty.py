@@ -319,17 +319,68 @@ class VT100Tests(TerminalTestCase):
 	def tearDown1(self):
 		pass
 
-	def test_clearScreen(self):
+	def sendEsc(self, string):
+		self.vty.interpret(chr(0x1b))
+		for c in string:
+			self.vty.interpret(c)
+
+	def test_clearScreen_toEnd(self):
+		for i in range(self.vty.cols - 2):
+			self.vty.interpret('a')
+		self.vty.interpret('\r')
+		self.vty.interpret('\n')
 		for i in range(self.vty.cols - 2):
 			self.vty.interpret('a')
 
-		self.vty.interpret(chr(0x1b))
-		self.vty.interpret('[')
-		self.vty.interpret('2')
-		self.vty.interpret('J')
+		self.vty.current_row = 0
+		self.vty.current_col = 5
+		self.sendEsc('[0J')
+
+		for i in range(self.vty.cols - 2):
+			if i < 5:
+				c = 'a'
+			else:
+				c = ''
+			self.assertCellChar(0, i, c)
+		for i in range(self.vty.cols - 2):
+			self.assertCellChar(1, i, '')
+
+	def test_clearScreen_fromStart(self):
+		for i in range(self.vty.cols - 2):
+			self.vty.interpret('a')
+		self.vty.interpret('\r')
+		self.vty.interpret('\n')
+		for i in range(self.vty.cols - 2):
+			self.vty.interpret('a')
+
+		self.vty.current_row = 1
+		self.vty.current_col = 5
+		self.sendEsc('[1J')
+
+		self.vty.dumpFrameBuffer()
+		for i in range(self.vty.cols - 2):
+			self.assertCellChar(0, i, '')
+		for i in range(self.vty.cols - 2):
+			if i > 5:
+				c = 'a'
+			else:
+				c = ''
+			self.assertCellChar(1, i, c)
+
+	def test_clearScreen_all(self):
+		for i in range(self.vty.cols - 2):
+			self.vty.interpret('a')
+		self.vty.interpret('\r')
+		self.vty.interpret('\n')
+		for i in range(self.vty.cols - 2):
+			self.vty.interpret('a')
+
+		self.sendEsc('[2J')
 
 		for i in range(self.vty.cols - 2):
 			self.assertCellChar(0, i, '')
+		for i in range(self.vty.cols - 2):
+			self.assertCellChar(1, i, '')
 
 	def test_argumentlessCursorPlace(self):
 		for i in range(self.vty.rows - 2):

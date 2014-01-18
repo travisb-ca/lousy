@@ -390,7 +390,25 @@ class VT100(DumbTerminal):
 		self.csi_params += c
 
 	def i_csi_clearScreen(self, cell, c):
-		if self.csi_params == '2':
+		if self.csi_params == '0':
+			# Clear from the cursor to the end of the screen
+			for col in range(self.current_col, self.cols):
+				cell = self.cell(self.current_row, col)
+				cell.char = ''
+			for row in range(self.current_row + 1, self.rows):
+				for col in range(self.cols):
+					cell = self.cell(row, col)
+					cell.char = ''
+		elif self.csi_params == '1':
+			# Clear screen from 0,0 to the cursor
+			for row in range(self.current_row):
+				for col in range(self.cols):
+					cell = self.cell(row, col)
+					cell.char = ''
+			for col in range(self.current_col + 1):
+				cell = self.cell(self.current_row, col)
+				cell.char = ''
+		elif self.csi_params == '2':
 			# Clear the entire screen
 			for row in range(self.rows):
 				for col in range(self.cols):
