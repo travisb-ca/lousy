@@ -939,6 +939,7 @@ class TestCase(unittest.TestCase):
 		self.tearDown2Called = None
 		self.addCleanup(self.tearDown)
 
+		self._FrameBufferLooseEquality = False
 		self.addTypeEqualityFunc(type(FrameBuffer('')), self._assertEqual_FrameBuffer)
 
 	def _assertEqual_FrameBuffer(self, a, b, msg=None):
@@ -955,7 +956,15 @@ class TestCase(unittest.TestCase):
 
 		for row in range(len(a)):
 			for col in range(len(a[row])):
-				if a[row][col] != b[row][col] and errors < max_errors:
+				A = a[row][col]
+				B = b[row][col]
+
+				if self._FrameBufferLooseEquality:
+					if A.char == '':
+						A.char = ' '
+					if B.char == '':
+						B.char = ' '
+				if A != B and errors < max_errors:
 					failmsg += '(%d, %d) "%s" != "%s"; ' % (row, col, a[row][col], b[row][col])
 					errors += 1
 
