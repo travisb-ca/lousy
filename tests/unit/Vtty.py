@@ -383,3 +383,27 @@ class VT100Tests(TerminalTestCase):
 		for i in range(self.vty.rows - 2):
 			if i != 19:
 				self.assertCellChar(i, i, 'a')
+
+class VttyTests(TerminalTestCase):
+	'''Test the Vtty class'''
+	def setUp1(self):
+		self.vtty = lousy.Vtty('dumb')
+
+	def tearDown1(self):
+		pass
+
+	def test_string(self):
+		s = 'abcdefghijklmnopqrstuvwxyz'
+
+		for i in range(4):
+			self.vtty.append(s)
+
+		t = self.vtty.string(0, 0, len(s))
+		self.assertEqual(t, s)
+
+		t = self.vtty.string(0, 10, len(s) - 10)
+		self.assertEqual(t, s[10:])
+
+		t = self.vtty.string(0, 79, 30)
+		self.assertEqual(t, self.vtty.cell(0, 79).char)
+
