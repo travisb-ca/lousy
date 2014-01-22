@@ -357,7 +357,6 @@ class VT100Tests(TerminalTestCase):
 		self.vty.current_col = 5
 		self.sendEsc('[1J')
 
-		self.vty.dumpFrameBuffer()
 		for i in range(self.vty.cols - 2):
 			self.assertCellChar(0, i, '')
 		for i in range(self.vty.cols - 2):
