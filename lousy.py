@@ -147,6 +147,7 @@ class DumbTerminal(object):
 		'''Print out the characters of the framebuffer as it stands. Note that this is
 		   only an approximation as blank cells are written as spaces.
 		'''
+		# Tens digit of column
 		sys.stdout.write('\n   ')
 		for col in range(self.cols):
 			if col % 10 == 0 and col > 0:
@@ -154,16 +155,19 @@ class DumbTerminal(object):
 			else:
 				sys.stdout.write(' ')
 
+		# Ones digit of column
 		sys.stdout.write('\n   ')
 		for col in range(self.cols):
 			sys.stdout.write('%s' % str(col % 10))
 
+		# Top containment line
 		sys.stdout.write('\n  +')
 		for col in range(self.cols):
 			sys.stdout.write('-')
 		sys.stdout.write('+\n')
 
 		for row in range(self.rows):
+			# Row number
 			if row % 10 == 0 and row != 0:
 				sys.stdout.write('%s|' % str(row % 100))
 			else:
@@ -177,11 +181,31 @@ class DumbTerminal(object):
 					sys.stdout.write(' ')
 				else:
 					sys.stdout.write(cell.char)
-			sys.stdout.write('|\n')
+			# Row number
+			if row % 10 == 0 and row != 0:
+				sys.stdout.write('|%s\n' % str(row % 100))
+			else:
+				sys.stdout.write('| %s\n' % str(row % 10))
+		# Bottom containment line
 		sys.stdout.write('  +')
 		for col in range(self.cols):
 			sys.stdout.write('-')
 		sys.stdout.write('+\n')
+
+		# Tens digits of column
+		sys.stdout.write('   ')
+		for col in range(self.cols):
+			if col % 10 == 0 and col > 0:
+				sys.stdout.write('%s' % str((col / 10) % 10))
+			else:
+				sys.stdout.write(' ')
+
+		# Ones digit of column
+		sys.stdout.write('\n   ')
+		for col in range(self.cols):
+			sys.stdout.write('%s' % str(col % 10))
+		sys.stdout.write('\n')
+
 
 	def cell(self, row, col):
 		'''Retreive the FrameBufferCell for the given location. Returns None if the cell is out of range.
