@@ -324,6 +324,27 @@ class VT100Tests(TerminalTestCase):
 		for c in string:
 			self.vty.interpret(c)
 
+	def test_clearScreen_toEnd_default(self):
+		for i in range(self.vty.cols - 2):
+			self.vty.interpret('a')
+		self.vty.interpret('\r')
+		self.vty.interpret('\n')
+		for i in range(self.vty.cols - 2):
+			self.vty.interpret('a')
+
+		self.vty.current_row = 0
+		self.vty.current_col = 5
+		self.sendEsc('[J')
+
+		for i in range(self.vty.cols - 2):
+			if i < 5:
+				c = 'a'
+			else:
+				c = ''
+			self.assertCellChar(0, i, c)
+		for i in range(self.vty.cols - 2):
+			self.assertCellChar(1, i, '')
+
 	def test_clearScreen_toEnd(self):
 		for i in range(self.vty.cols - 2):
 			self.vty.interpret('a')
