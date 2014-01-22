@@ -414,9 +414,6 @@ class VT100(DumbTerminal):
 				for col in range(self.cols):
 					cell = self.cell(row, col)
 					cell.char = ''
-		else:
-			# TODO Implement the other modes
-			pass
 
 		self.mode = 'normal'
 
