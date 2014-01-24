@@ -324,6 +324,9 @@ class VT100Tests(TerminalTestCase):
 		for c in string:
 			self.vty.interpret(c)
 
+	def placeCursor(self, row, col):
+		self.sendEsc('[%d;%df' % (row + 1, col + 1))
+
 	def test_clearScreen_toEnd_default(self):
 		for i in range(self.vty.cols - 2):
 			self.vty.interpret('a')
@@ -539,6 +542,96 @@ class VT100Tests(TerminalTestCase):
 
 		self.assertCellChar(0, 0, 'b')
 		self.assertCellChar(0, 1, 'a')
+
+	def test_moveCursorForwards_default(self):
+		for i in range(self.vty.cols - 1):
+			self.vty.interpret('a')
+
+		self.placeCursor(0, 0)
+		self.assertEqual(self.vty.current_col, 0)
+
+		self.sendEsc('[C')
+		self.sendEsc('[C')
+		self.sendEsc('[C')
+
+		self.assertEqual(self.vty.current_col, 3)
+
+		self.vty.interpret('b')
+
+		self.assertCellChar(0, 2, 'a')
+		self.assertCellChar(0, 3, 'b')
+		self.assertCellChar(0, 4, 'a')
+
+	def test_moveCursorForwards_one(self):
+		for i in range(self.vty.cols - 1):
+			self.vty.interpret('a')
+
+		self.placeCursor(0, 0)
+		self.assertEqual(self.vty.current_col, 0)
+
+		self.sendEsc('[1C')
+		self.sendEsc('[1C')
+		self.sendEsc('[1C')
+
+		self.assertEqual(self.vty.current_col, 3)
+
+		self.vty.interpret('b')
+
+		self.assertCellChar(0, 2, 'a')
+		self.assertCellChar(0, 3, 'b')
+		self.assertCellChar(0, 4, 'a')
+
+	def test_moveCursorForwards_zero(self):
+		for i in range(self.vty.cols - 1):
+			self.vty.interpret('a')
+
+		self.placeCursor(0, 0)
+		self.assertEqual(self.vty.current_col, 0)
+
+		self.sendEsc('[0C')
+		self.sendEsc('[0C')
+		self.sendEsc('[0C')
+
+		self.assertEqual(self.vty.current_col, 3)
+
+		self.vty.interpret('b')
+
+		self.assertCellChar(0, 2, 'a')
+		self.assertCellChar(0, 3, 'b')
+		self.assertCellChar(0, 4, 'a')
+
+	def test_moveCursorForwards_arg(self):
+		for i in range(self.vty.cols - 1):
+			self.vty.interpret('a')
+
+		self.placeCursor(0, 0)
+		self.assertEqual(self.vty.current_col, 0)
+
+		self.sendEsc('[3C')
+
+		self.assertEqual(self.vty.current_col, 3)
+
+		self.vty.interpret('b')
+
+		self.assertCellChar(0, 2, 'a')
+		self.assertCellChar(0, 3, 'b')
+		self.assertCellChar(0, 4, 'a')
+
+	def test_moveCursorForwards_rightPastMargin(self):
+		for i in range(self.vty.cols - 1):
+			self.vty.interpret('a')
+
+		self.placeCursor(0, 0)
+		self.assertEqual(self.vty.current_col, 0)
+
+		self.sendEsc('[300C')
+
+		self.assertEqual(self.vty.current_col, 79)
+
+		self.vty.interpret('b')
+
+		self.assertCellChar(0, 78, 'a')
+		self.assertCellChar(0, 79, 'b')
 
 class VttyTests(TerminalTestCase):
 	'''Test the Vtty class'''

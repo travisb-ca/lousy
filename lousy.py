@@ -398,6 +398,7 @@ class VT100(DumbTerminal):
 				'J': self.i_csi_clearScreen,
 				'f': self.i_csi_placeCursor,
 				'D': self.i_csi_moveCursorBackwards,
+				'C': self.i_csi_moveCursorForwards,
 				}
 
 	def i_normal_escape(self, cell, c):
@@ -468,6 +469,19 @@ class VT100(DumbTerminal):
 			distance = 1
 
 		self.current_col = max(0, self.current_col - distance)
+
+		self.mode = 'normal'
+
+	def i_csi_moveCursorForwards(self, cell, c):
+		if self.csi_params == '':
+			distance = 1
+		else:
+			distance = int(self.csi_params)
+
+		if distance == 0:
+			distance = 1
+
+		self.current_col = min(self.cols - 1, self.current_col + distance)
 
 		self.mode = 'normal'
 
