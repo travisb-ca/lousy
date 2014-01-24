@@ -455,6 +455,91 @@ class VT100Tests(TerminalTestCase):
 			if i != 19:
 				self.assertCellChar(i, i, 'a')
 
+	def test_moveCursorBackwards_default(self):
+		for i in range(self.vty.cols - 1):
+			self.vty.interpret('a')
+
+		self.assertEqual(self.vty.current_col, 79)
+
+		self.sendEsc('[D')
+		self.sendEsc('[D')
+		self.sendEsc('[D')
+
+		self.assertEqual(self.vty.current_col, 76)
+
+		self.vty.interpret('b')
+
+		self.assertCellChar(0, 75, 'a')
+		self.assertCellChar(0, 76, 'b')
+		self.assertCellChar(0, 77, 'a')
+
+	def test_moveCursorBackwards_one(self):
+		for i in range(self.vty.cols - 1):
+			self.vty.interpret('a')
+
+		self.assertEqual(self.vty.current_col, 79)
+
+		self.sendEsc('[1D')
+		self.sendEsc('[1D')
+		self.sendEsc('[1D')
+
+		self.assertEqual(self.vty.current_col, 76)
+
+		self.vty.interpret('b')
+
+		self.assertCellChar(0, 75, 'a')
+		self.assertCellChar(0, 76, 'b')
+		self.assertCellChar(0, 77, 'a')
+
+	def test_moveCursorBackwards_zero(self):
+		for i in range(self.vty.cols - 1):
+			self.vty.interpret('a')
+
+		self.assertEqual(self.vty.current_col, 79)
+
+		self.sendEsc('[0D')
+		self.sendEsc('[0D')
+		self.sendEsc('[0D')
+
+		self.assertEqual(self.vty.current_col, 76)
+
+		self.vty.interpret('b')
+
+		self.assertCellChar(0, 75, 'a')
+		self.assertCellChar(0, 76, 'b')
+		self.assertCellChar(0, 77, 'a')
+
+	def test_moveCursorBackwards_arg(self):
+		for i in range(self.vty.cols - 1):
+			self.vty.interpret('a')
+
+		self.assertEqual(self.vty.current_col, 79)
+
+		self.sendEsc('[3D')
+
+		self.assertEqual(self.vty.current_col, 76)
+
+		self.vty.interpret('b')
+
+		self.assertCellChar(0, 75, 'a')
+		self.assertCellChar(0, 76, 'b')
+		self.assertCellChar(0, 77, 'a')
+
+	def test_moveCursorBackwards_leftPastMargin(self):
+		for i in range(self.vty.cols - 1):
+			self.vty.interpret('a')
+
+		self.assertEqual(self.vty.current_col, 79)
+
+		self.sendEsc('[300D')
+
+		self.assertEqual(self.vty.current_col, 0)
+
+		self.vty.interpret('b')
+
+		self.assertCellChar(0, 0, 'b')
+		self.assertCellChar(0, 1, 'a')
+
 class VttyTests(TerminalTestCase):
 	'''Test the Vtty class'''
 	def setUp1(self):

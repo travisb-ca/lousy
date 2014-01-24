@@ -397,6 +397,7 @@ class VT100(DumbTerminal):
 				'default': self.i_csi_collectParams,
 				'J': self.i_csi_clearScreen,
 				'f': self.i_csi_placeCursor,
+				'D': self.i_cri_moveCursorBackwards,
 				}
 
 	def i_normal_escape(self, cell, c):
@@ -455,6 +456,19 @@ class VT100(DumbTerminal):
 				# Assume 'l;c'
 				self.current_row = max(int(coords[0]) - 1, 0)
 				self.current_col = max(int(coords[1]) - 1, 0)
+		self.mode = 'normal'
+
+	def i_cri_moveCursorBackwards(self, cell, c):
+		if self.csi_params == '':
+			distance = 1
+		else:
+			distance = int(self.csi_params)
+
+		if distance == 0:
+			distance = 1
+
+		self.current_col = max(0, self.current_col - distance)
+
 		self.mode = 'normal'
 
 class Vtty(object):
