@@ -1,0 +1,18 @@
+Component: Test_Runner
+Date: 2014-01-24 06:28:29
+Depends_On: 
+Duplicate_Of: 
+Fix_By: 1.0
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Blocker
+State: Open
+Title: Output exact error on test import failure
+Type: Bug
+Units_of_Work: 1000
+--
+Currently if you try to load a test module to list the contents or run it and there is a syntax error in that module Lousy will barf. Instead it should output the precise error and carry on. This isn't as trivial as I first believed so it needs some deeper thought and more time spent on it.
