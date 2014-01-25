@@ -843,6 +843,66 @@ class VT100Tests(TerminalTestCase):
 		self.assertCellChar(22, 20, 'a')
 		self.assertCellChar(23, 20, 'b')
 
+	def test_eraseLine_toEnd_default(self):
+		for i in range(self.vty.cols - 1):
+			self.vty.interpret('a')
+		self.placeCursor(0, 20)
+
+		self.sendEsc('[K')
+
+		self.assertEqual(self.vty.current_col, 20)
+
+		for i in range(self.vty.cols):
+			if i < 20:
+				c = 'a'
+			else:
+				c = ''
+			self.assertCellChar(0, i, c)
+
+	def test_eraseLine_toEnd(self):
+		for i in range(self.vty.cols - 1):
+			self.vty.interpret('a')
+		self.placeCursor(0, 20)
+
+		self.sendEsc('[0K')
+
+		self.assertEqual(self.vty.current_col, 20)
+
+		for i in range(self.vty.cols):
+			if i < 20:
+				c = 'a'
+			else:
+				c = ''
+			self.assertCellChar(0, i, c)
+
+	def test_eraseLine_fromStart(self):
+		for i in range(self.vty.cols - 1):
+			self.vty.interpret('a')
+		self.placeCursor(0, 20)
+
+		self.sendEsc('[1K')
+
+		self.assertEqual(self.vty.current_col, 20)
+
+		for i in range(self.vty.cols - 1):
+			if i <= 20:
+				c = ''
+			else:
+				c = 'a'
+			self.assertCellChar(0, i, c)
+
+	def test_eraseLine_all(self):
+		for i in range(self.vty.cols - 1):
+			self.vty.interpret('a')
+		self.placeCursor(0, 20)
+
+		self.sendEsc('[2K')
+
+		self.assertEqual(self.vty.current_col, 20)
+
+		for i in range(self.vty.cols - 1):
+			self.assertCellChar(0, i, '')
+
 class VttyTests(TerminalTestCase):
 	'''Test the Vtty class'''
 	def setUp1(self):

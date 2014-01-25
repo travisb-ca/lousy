@@ -403,6 +403,7 @@ class VT100(DumbTerminal):
 				'B': self.i_csi_moveCursorDown,
 				'C': self.i_csi_moveCursorForwards,
 				'D': self.i_csi_moveCursorBackwards,
+				'K': self.i_csi_eraseInLine,
 				}
 
 	def i_normal_escape(self, cell, c):
@@ -512,6 +513,25 @@ class VT100(DumbTerminal):
 			distance = 1
 
 		self.current_col = max(0, self.current_col - distance)
+
+		self.mode = 'normal'
+
+	def i_csi_eraseInLine(self, cell, c):
+		if self.csi_params == '0' or len(self.csi_params) == 0:
+			# Erase from current position to end of line
+			for col in range(self.current_col, self.cols):
+				cell = self.cell(self.current_row, col)
+				cell.char = ''
+		elif self.csi_params == '1':
+			# Erase from beginning of line to current position
+			for col in range(self.current_col + 1):
+				cell = self.cell(self.current_row, col)
+				cell.char = ''
+		elif self.csi_params == '2':
+			# Erase entire line
+			for col in range(self.cols):
+				cell = self.cell(self.current_row, col)
+				cell.char = ''
 
 		self.mode = 'normal'
 
