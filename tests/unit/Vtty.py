@@ -405,14 +405,14 @@ class VT100Tests(TerminalTestCase):
 		for i in range(self.vty.cols - 2):
 			self.assertCellChar(1, i, '')
 
-	def test_argumentlessCursorPlace(self):
+	def test_argumentlessCursorPlace(self, echar='f'):
 		for i in range(self.vty.rows - 2):
 			self.vty.interpret('a')
 			self.vty.interpret('\n')
 
 		self.vty.interpret(chr(0x1b))
 		self.vty.interpret('[')
-		self.vty.interpret('f')
+		self.vty.interpret(echar)
 		
 		self.vty.interpret('b')
 
@@ -420,7 +420,10 @@ class VT100Tests(TerminalTestCase):
 		for i in range(1, self.vty.rows - 2):
 			self.assertCellChar(i, i, 'a')
 
-	def test_emptyArgumentCursorPlace(self):
+	def test_argumentlessCursorPlace_variant_H(self):
+		return self.test_argumentlessCursorPlace(echar='H')
+
+	def test_emptyArgumentCursorPlace(self, echar='f'):
 		for i in range(self.vty.rows - 2):
 			self.vty.interpret('a')
 			self.vty.interpret('\n')
@@ -428,7 +431,7 @@ class VT100Tests(TerminalTestCase):
 		self.vty.interpret(chr(0x1b))
 		self.vty.interpret('[')
 		self.vty.interpret(';')
-		self.vty.interpret('f')
+		self.vty.interpret(echar)
 		
 		self.vty.interpret('b')
 
@@ -436,7 +439,10 @@ class VT100Tests(TerminalTestCase):
 		for i in range(1, self.vty.rows - 2):
 			self.assertCellChar(i, i, 'a')
 
-	def test_argumentCursorPlace(self):
+	def test_emptyArgumentCursorPlace_variant_H(self):
+		return self.test_emptyArgumentCursorPlace(echar='H')
+
+	def test_argumentCursorPlace(self, echar='f'):
 		for i in range(self.vty.rows - 2):
 			self.vty.interpret('a')
 			self.vty.interpret('\n')
@@ -448,7 +454,7 @@ class VT100Tests(TerminalTestCase):
 		self.vty.interpret(';')
 		self.vty.interpret('2')
 		self.vty.interpret('0')
-		self.vty.interpret('f')
+		self.vty.interpret(echar)
 		
 		self.vty.interpret('b')
 
@@ -457,6 +463,9 @@ class VT100Tests(TerminalTestCase):
 		for i in range(self.vty.rows - 2):
 			if i != 19:
 				self.assertCellChar(i, i, 'a')
+
+	def test_argumentCursorPlace_variant_H(self):
+		return self.test_argumentCursorPlace(echar='H')
 
 	def test_moveCursorBackwards_default(self):
 		for i in range(self.vty.cols - 1):

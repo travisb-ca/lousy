@@ -400,12 +400,13 @@ class VT100(DumbTerminal):
 
 		self.modes['csi'] = {
 				'default': self.i_csi_collectParams,
-				'J': self.i_csi_clearScreen,
 				'f': self.i_csi_placeCursor,
 				'A': self.i_csi_moveCursorUp,
 				'B': self.i_csi_moveCursorDown,
 				'C': self.i_csi_moveCursorForwards,
 				'D': self.i_csi_moveCursorBackwards,
+				'H': self.i_csi_placeCursor,
+				'J': self.i_csi_clearScreen,
 				'K': self.i_csi_eraseInLine,
 				}
 
