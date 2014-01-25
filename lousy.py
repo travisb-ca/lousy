@@ -394,6 +394,7 @@ class VT100(DumbTerminal):
 				'default': self.i_escape_exit,
 				'[': self.i_escape_csi,
 				'D': self.i_escape_cursorDown,
+				'M': self.i_escape_cursorUp,
 				}
 
 		self.modes['csi'] = {
@@ -420,6 +421,10 @@ class VT100(DumbTerminal):
 
 	def i_escape_cursorDown(self, cell, c):
 		self.current_row += 1
+		self.mode = 'normal'
+
+	def i_escape_cursorUp(self, cell, c):
+		self.current_row = max(0, self.current_row - 1)
 		self.mode = 'normal'
 
 	def i_csi_collectParams(self, cell, c):

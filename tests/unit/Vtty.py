@@ -955,6 +955,58 @@ class VT100Tests(TerminalTestCase):
 		self.assertCellChar(22, 20, '')
 		self.assertCellChar(23, 20, 'b')
 
+	def test_moveCursorUp_escape(self):
+		self.placeCursor(0, 21)
+		for i in range(self.vty.rows - 1):
+			self.sendEsc('[1D')
+			self.vty.interpret('a')
+			self.vty.interpret('\n')
+		self.placeCursor(20, 20)
+
+		self.assertEqual(self.vty.current_row, 20)
+
+		self.sendEsc('M')
+		self.sendEsc('M')
+		self.sendEsc('M')
+
+		self.assertEqual(self.vty.current_row, 17)
+
+		self.vty.interpret('b')
+
+		self.assertCellChar(16, 20, 'a')
+		self.assertCellChar(17, 20, 'b')
+		self.assertCellChar(18, 20, 'a')
+
+	def test_moveCursorUp_escape_pastMargin(self):
+		self.placeCursor(0, 21)
+		for i in range(self.vty.rows - 1):
+			self.sendEsc('[1D')
+			self.vty.interpret('%s' % str(i % 10))
+			self.vty.interpret('\n')
+		self.placeCursor(20, 20)
+
+		self.assertEqual(self.vty.current_row, 20)
+
+		for i in range(20):
+			# Move to top of screen
+			self.sendEsc('M')
+		self.assertEqual(self.vty.current_row, 0)
+
+		# Scroll off the top
+		self.sendEsc('M')
+		self.sendEsc('M')
+		self.sendEsc('M')
+
+		self.assertEqual(self.vty.current_row, 0)
+
+		self.vty.interpret('b')
+
+		self.assertCellChar(0, 20, 'b')
+		self.assertCellChar(1, 20, '1')
+		self.assertCellChar(2, 20, '2')
+		self.assertCellChar(3, 20, '3')
+		self.assertCellChar(4, 20, '4')
+
 class VttyTests(TerminalTestCase):
 	'''Test the Vtty class'''
 	def setUp1(self):
