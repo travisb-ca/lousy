@@ -1007,6 +1007,37 @@ class VT100Tests(TerminalTestCase):
 		self.assertCellChar(3, 20, '3')
 		self.assertCellChar(4, 20, '4')
 
+	def test_nextLine(self):
+		self.placeCursor(0, 21)
+		for i in range(self.vty.rows - 1):
+			self.sendEsc('[1D')
+			self.vty.interpret('%s' % str(i % 10))
+			self.vty.interpret('\n')
+		self.placeCursor(20, 20)
+
+		self.assertEqual(self.vty.current_row, 20)
+
+		self.sendEsc('E')
+
+		self.assertEqual(self.vty.current_row, 21)
+		self.assertEqual(self.vty.current_col, 0)
+
+		self.sendEsc('E')
+		self.sendEsc('E')
+		self.sendEsc('E')
+		self.sendEsc('E')
+
+		self.vty.interpret('b')
+
+		self.assertEqual(self.vty.current_row, 23)
+		self.assertEqual(self.vty.current_col, 1)
+
+		self.assertCellChar(19, 20, '1')
+		self.assertCellChar(20, 20, '2')
+		self.assertCellChar(21, 20, '')
+		self.assertCellChar(22, 20, '')
+		self.assertCellChar(23, 20, '')
+
 class VttyTests(TerminalTestCase):
 	'''Test the Vtty class'''
 	def setUp1(self):
