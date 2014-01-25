@@ -31,6 +31,8 @@ import asyncore
 import threading
 import socket
 import struct
+import importlib
+import traceback
 import pprint
 
 DEFAULT_PORT = 12345
@@ -1471,10 +1473,19 @@ if __name__ == '__main__':
 		result = []
 
 		for test_file in test_root:
-			for test_class in test_file:
-				for test in test_class:
-					if re.search(regex, type + '/' + test.id()) is not None:
-						result.append(test)
+			try:
+				for test_class in test_file:
+					for test in test_class:
+						if re.search(regex, type + '/' + test.id()) is not None:
+							result.append(test)
+			except TypeError:
+				print 'Unable to import test file:'
+				try:
+					importlib.import_module(test_class._testMethodName, type)
+				except Exception as e:
+					# Skip the frames inside Lousy
+					stack_depth = len(traceback.extract_tb(sys.exc_info()[2]))
+					traceback.print_exc(limit=stack_depth - 2)
 		return result
 
 	def cmd_list(args):
