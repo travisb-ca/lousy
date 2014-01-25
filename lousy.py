@@ -400,6 +400,7 @@ class VT100(DumbTerminal):
 				'J': self.i_csi_clearScreen,
 				'f': self.i_csi_placeCursor,
 				'A': self.i_csi_moveCursorUp,
+				'B': self.i_csi_moveCursorDown,
 				'C': self.i_csi_moveCursorForwards,
 				'D': self.i_csi_moveCursorBackwards,
 				}
@@ -472,6 +473,19 @@ class VT100(DumbTerminal):
 			distance = 1
 
 		self.current_row = max(0, self.current_row - distance)
+
+		self.mode = 'normal'
+
+	def i_csi_moveCursorDown(self, cell, c):
+		if self.csi_params == '':
+			distance = 1
+		else:
+			distance = int(self.csi_params)
+
+		if distance == 0:
+			distance = 1
+
+		self.current_row = min(self.rows - 1, self.current_row + distance)
 
 		self.mode = 'normal'
 

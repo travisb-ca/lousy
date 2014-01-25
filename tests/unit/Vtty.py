@@ -719,6 +719,92 @@ class VT100Tests(TerminalTestCase):
 		self.assertCellChar(20, 20, 'b')
 		self.assertCellChar(21, 20, 'a')
 
+	def test_moveCursorDown_default(self):
+		self.placeCursor(0, 21)
+		for i in range(self.vty.rows - 1):
+			self.sendEsc('[1D')
+			self.vty.interpret('a')
+			self.vty.interpret('\n')
+		self.placeCursor(0, 20)
+
+		self.assertEqual(self.vty.current_row, 0)
+
+		self.sendEsc('[B')
+		self.sendEsc('[B')
+		self.sendEsc('[B')
+
+		self.assertEqual(self.vty.current_row, 3)
+
+		self.vty.interpret('b')
+
+		self.assertCellChar(2, 20, 'a')
+		self.assertCellChar(3, 20, 'b')
+		self.assertCellChar(4, 20, 'a')
+
+	def test_moveCursorDown_one(self):
+		self.placeCursor(0, 21)
+		for i in range(self.vty.rows - 1):
+			self.sendEsc('[1D')
+			self.vty.interpret('a')
+			self.vty.interpret('\n')
+		self.placeCursor(0, 20)
+
+		self.assertEqual(self.vty.current_row, 0)
+
+		self.sendEsc('[1B')
+		self.sendEsc('[1B')
+		self.sendEsc('[1B')
+
+		self.assertEqual(self.vty.current_row, 3)
+
+		self.vty.interpret('b')
+
+		self.assertCellChar(2, 20, 'a')
+		self.assertCellChar(3, 20, 'b')
+		self.assertCellChar(4, 20, 'a')
+
+	def test_moveCursorDown_zero(self):
+		self.placeCursor(0, 21)
+		for i in range(self.vty.rows - 1):
+			self.sendEsc('[1D')
+			self.vty.interpret('a')
+			self.vty.interpret('\n')
+		self.placeCursor(0, 20)
+
+		self.assertEqual(self.vty.current_row, 0)
+
+		self.sendEsc('[0B')
+		self.sendEsc('[0B')
+		self.sendEsc('[0B')
+
+		self.assertEqual(self.vty.current_row, 3)
+
+		self.vty.interpret('b')
+
+		self.assertCellChar(2, 20, 'a')
+		self.assertCellChar(3, 20, 'b')
+		self.assertCellChar(4, 20, 'a')
+
+	def test_moveCursorDown_arg(self):
+		self.placeCursor(0, 21)
+		for i in range(self.vty.rows - 1):
+			self.sendEsc('[1D')
+			self.vty.interpret('a')
+			self.vty.interpret('\n')
+		self.placeCursor(0, 20)
+
+		self.assertEqual(self.vty.current_row, 0)
+
+		self.sendEsc('[3B')
+
+		self.assertEqual(self.vty.current_row, 3)
+
+		self.vty.interpret('b')
+
+		self.assertCellChar(2, 20, 'a')
+		self.assertCellChar(3, 20, 'b')
+		self.assertCellChar(4, 20, 'a')
+
 class VttyTests(TerminalTestCase):
 	'''Test the Vtty class'''
 	def setUp1(self):
