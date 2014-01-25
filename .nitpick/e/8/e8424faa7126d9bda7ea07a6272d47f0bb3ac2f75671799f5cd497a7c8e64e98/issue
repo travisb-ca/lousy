@@ -1,0 +1,18 @@
+Component: Vtty
+Date: 2014-01-25 05:33:51
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Eventually
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Major
+State: Open
+Title: Add Framebuffer scrollback
+Type: Feature
+Units_of_Work: 1000
+--
+Currently all the VTTY types assume that they just have a single framebuffer and have no scroll back. However, some commands, such as ^]M (reverse index) scroll back in the scroll back. Support for a scroll back buffer should be added.
