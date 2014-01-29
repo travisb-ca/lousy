@@ -1,13 +1,21 @@
 # Tests of the various emulated terminal classes
 
 import lousy
+import itertools
 
 class TerminalTestCase(lousy.TestCase):
 	def assertCellChar(self, row, col, char):
 		cell = self.vty.cell(row, col)
-		self.assertIsNotNone(cell)
+		self.assertIsNotNone(cell, 'cell at (%d, %d)' % (row, col))
 		msg = '"%s" != "%s" at cell (%d, %d)' % (char, cell.char, row, col)
 		self.assertEqual(cell.char, char, msg)
+
+	def assertCellAttrs(self, row, col, attr_list):
+		cell = self.vty.cell(row, col)
+		self.assertIsNotNone(cell, 'cell at (%d, %d)' % (row, col))
+		attributes = set(attr_list)
+		msg = 'Attributes "%s" != "%s" at cell (%d, %d)' % (attributes, cell.attributes, row, col)
+		self.assertEqual(cell.attributes, attributes, msg)
 
 class DumbTerminalTests(TerminalTestCase):
 	''' Test the DumbTerminal class '''
@@ -1046,6 +1054,123 @@ class VT100Tests(TerminalTestCase):
 		self.assertCellChar(21, 20, '')
 		self.assertCellChar(22, 20, '')
 		self.assertCellChar(23, 20, '')
+
+	def test_attributeBold(self):
+		self.sendEsc('[1m')
+		self.vty.interpret('a')
+		self.sendEsc('[0m')
+
+		self.assertCellChar(0, 0, 'a')
+		self.assertCellAttrs(0, 0, [lousy.FrameBufferCell.BOLD])
+
+	def test_attributeUnderscore(self):
+		self.sendEsc('[4m')
+		self.vty.interpret('a')
+		self.sendEsc('[0m')
+
+		self.assertCellChar(0, 0, 'a')
+		self.assertCellAttrs(0, 0, [lousy.FrameBufferCell.UNDERSCORE])
+
+	def test_attributeBlink(self):
+		self.sendEsc('[5m')
+		self.vty.interpret('a')
+		self.sendEsc('[0m')
+
+		self.assertCellChar(0, 0, 'a')
+		self.assertCellAttrs(0, 0, [lousy.FrameBufferCell.BLINK])
+
+	def test_attributeReverse(self):
+		self.sendEsc('[7m')
+		self.vty.interpret('a')
+		self.sendEsc('[0m')
+
+		self.assertCellChar(0, 0, 'a')
+		self.assertCellAttrs(0, 0, [lousy.FrameBufferCell.REVERSE])
+
+	def outputCharWithAttrs(self, attrs, char):
+		attributes = []
+		if attrs & 0x1 == 0x1: # bold
+			attributes.append('1')
+		if attrs & 0x2 == 0x2: # underscore
+			attributes.append('4')
+		if attrs & 0x4 == 0x4: # blink
+			attributes.append('5')
+		if attrs & 0x8 == 0x8: # reverse
+			attributes.append('7')
+
+		if attrs == 0:
+			cmd = '0'
+		else:
+			cmd = ';'.join(attributes)
+
+		self.sendEsc('[%sm' % cmd)
+		self.vty.interpret(char)
+
+	def flags_to_attr(self, attrs):
+		attributes = []
+		if attrs & 0x1 == 0x1: # bold
+			attributes.append(lousy.FrameBufferCell.BOLD)
+		if attrs & 0x2 == 0x2: # underscore
+			attributes.append(lousy.FrameBufferCell.UNDERSCORE)
+		if attrs & 0x4 == 0x4: # blink
+			attributes.append(lousy.FrameBufferCell.BLINK)
+		if attrs & 0x8 == 0x8: # reverse
+			attributes.append(lousy.FrameBufferCell.REVERSE)
+
+		return attributes
+
+	def test_attributeCombinationsSingleChar(self):
+		for i in range(16):
+			self.outputCharWithAttrs(i, 'a')
+			self.sendEsc('[0m')
+
+		for i in range(16):
+			self.assertCellChar(0, i, 'a')
+			self.assertCellAttrs(0, i, self.flags_to_attr(i))
+
+	def test_attributeCombinationsSingleCharWithNormalChar(self):
+		for i in range(0, 16):
+			self.outputCharWithAttrs(i, 'b')
+			self.outputCharWithAttrs(0, 'c')
+
+		for i in range(16):
+			self.assertCellChar(0, 2*i, 'b')
+			self.assertCellAttrs(0, 2*i, self.flags_to_attr(i))
+
+			self.assertCellChar(0, 2*i + 1, 'c')
+			self.assertCellAttrs(0, 2*i + 1, [])
+
+	def test_attributeCombinationsCumulative(self):
+		attributes = [1, 4, 5, 7]
+		map = {1 : lousy.FrameBufferCell.BOLD,
+			4: lousy.FrameBufferCell.UNDERSCORE,
+			5: lousy.FrameBufferCell.BLINK,
+			7: lousy.FrameBufferCell.REVERSE
+			}
+		row = 0
+
+		for l in range(1, len(attributes) + 1):
+			for combo in itertools.combinations(attributes, l):
+				for permutation in itertools.permutations(combo):
+					for attr in permutation:
+						self.sendEsc('[%sm' % str(attr))
+						self.vty.interpret('a')
+					self.sendEsc('[0m')
+
+					self.vty.interpret('\t')
+					for attr in permutation:
+						self.vty.interpret(str(attr))
+
+					for i in range(len(permutation)):
+						attrs = [map[a] for a in permutation[:i + 1]]
+						self.assertCellAttrs(row, i, attrs)
+
+					self.vty.interpret('\n')
+					self.vty.interpret('\r')
+					row += 1
+					if row == self.vty.rows:
+						row = self.vty.rows - 1
+
 
 class VttyTests(TerminalTestCase):
 	'''Test the Vtty class'''

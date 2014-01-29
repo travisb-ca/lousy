@@ -54,10 +54,13 @@ class FrameBufferCell(object):
 	   framebuffer.
 	'''
 	char = ''
-	attributes = 0
+	attributes = set()
 
-	# Various bit-flag attributes
-	fl_set = (1 << 0) # This cell has a valid value
+	# Various character attributes
+	BOLD = 'Bold'
+	UNDERSCORE = 'Underscore'
+	BLINK = 'Blink'
+	REVERSE = 'Reverse'
 
 	def __init__(self):
 		pass
@@ -145,6 +148,16 @@ class DumbTerminal(object):
 				chr(0x7f): self.i_ignore,
 				}
 
+	def dumpCell(self, cell):
+		'''Output a single cell with all it's formatting options set'''
+		if cell.char == '':
+			sys.stdout.write(' ')
+		elif cell.char == '\t':
+			sys.stdout.write(' ')
+		else:
+			sys.stdout.write(cell.char)
+
+
 	def dumpFrameBuffer(self):
 		'''Print out the characters of the framebuffer as it stands. Note that this is
 		   only an approximation as blank cells are written as spaces.
@@ -174,15 +187,11 @@ class DumbTerminal(object):
 				sys.stdout.write('%s|' % str(row % 100))
 			else:
 				sys.stdout.write(' %s|' % str(row % 10))
+
 			for col in range(self.cols):
 				cell = self.cell(row, col)
+				self.dumpCell(cell)
 
-				if cell.char == '':
-					sys.stdout.write(' ')
-				elif cell.char == '\t':
-					sys.stdout.write(' ')
-				else:
-					sys.stdout.write(cell.char)
 			# Row number
 			if row % 10 == 0 and row != 0:
 				sys.stdout.write('|%s\n' % str(row % 100))
@@ -386,6 +395,12 @@ class VT100(DumbTerminal):
 		self.cols = 80
 		self.autowrap = False
 
+		# Character attributes for characters as they come in
+		self.bold = False
+		self.underscore = False
+		self.blink = False
+		self.reverse = False
+
 		DumbTerminal.__init__(self)
 
 		self.modes['normal'][chr(0x1b)] = self.i_normal_escape
@@ -401,6 +416,7 @@ class VT100(DumbTerminal):
 		self.modes['csi'] = {
 				'default': self.i_csi_collectParams,
 				'f': self.i_csi_placeCursor,
+				'm': self.i_csi_specialGraphics,
 				'A': self.i_csi_moveCursorUp,
 				'B': self.i_csi_moveCursorDown,
 				'C': self.i_csi_moveCursorForwards,
@@ -409,6 +425,42 @@ class VT100(DumbTerminal):
 				'J': self.i_csi_clearScreen,
 				'K': self.i_csi_eraseInLine,
 				}
+	
+	def i_normal_chars(self, cell, c):
+		DumbTerminal.i_normal_chars(self, cell, c)
+
+		cell.attributes = set()
+
+		if self.bold:
+			cell.attributes.add(FrameBufferCell.BOLD)
+		if self.underscore:
+			cell.attributes.add(FrameBufferCell.UNDERSCORE)
+		if self.blink:
+			cell.attributes.add(FrameBufferCell.BLINK)
+		if self.reverse:
+			cell.attributes.add(FrameBufferCell.REVERSE)
+
+	def dumpCell(self, cell):
+		def escWrite(s):
+			sys.stdout.write(chr(0x1b) + s)
+
+		attributes = []
+		if FrameBufferCell.BOLD in cell.attributes:
+			attributes.append('1')
+		if FrameBufferCell.UNDERSCORE in cell.attributes:
+			attributes.append('4')
+		if FrameBufferCell.BLINK in cell.attributes:
+			attributes.append('5')
+		if FrameBufferCell.REVERSE in cell.attributes:
+			attributes.append('7')
+
+		# enable attributes
+		escWrite('[%sm' % ';'.join(attributes))
+
+		DumbTerminal.dumpCell(self, cell)
+
+		# reset all attributes
+		escWrite('[0m')
 
 	def i_normal_escape(self, cell, c):
 		# Start an escape sequence
@@ -479,6 +531,29 @@ class VT100(DumbTerminal):
 				# Assume 'l;c'
 				self.current_row = max(int(coords[0]) - 1, 0)
 				self.current_col = max(int(coords[1]) - 1, 0)
+		self.mode = 'normal'
+
+	def i_csi_specialGraphics(self, cell, c):
+		attributes = self.csi_params.split(';')
+		if len(attributes) == 0:
+			attributes = ['0']
+
+		for attr in attributes:
+			if attr == '0':
+				self.bold = False
+				self.underscore = False
+				self.blink = False
+				self.reverse = False
+
+			if attr == '1':
+				self.bold = True
+			if attr == '4':
+				self.underscore = True
+			if attr == '5':
+				self.blink = True
+			if attr == '7':
+				self.reverse = True
+
 		self.mode = 'normal'
 
 	def i_csi_moveCursorUp(self, cell, c):
