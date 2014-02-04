@@ -1174,8 +1174,8 @@ class VT100Tests(TerminalTestCase):
 					self.vty.interpret('\n')
 					self.vty.interpret('\r')
 					row += 1
-					if row == self.vty.rows:
-						row = self.vty.rows - 1
+					if row == self.bottom_row + 1:
+						row = self.bottom_row
 
 	def test_setTopBottomMargins(self):
 		for row in range(self.vty.rows):
