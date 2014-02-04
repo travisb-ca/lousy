@@ -1171,6 +1171,33 @@ class VT100Tests(TerminalTestCase):
 					if row == self.vty.rows:
 						row = self.vty.rows - 1
 
+	def test_setTopBottomMargins(self):
+		for row in range(self.vty.rows):
+			for col in range(self.vty.cols):
+				self.vty.interpret('a')
+			self.vty.interpret('\n')
+			self.vty.interpret('\r')
+
+		self.sendEsc('[10;12r')
+
+		self.assertEqual(0, self.vty.current_row)
+		self.assertEqual(0, self.vty.current_col)
+
+		self.placeCursor(9, 0)
+
+		for row in range(10):
+			for col in range(self.vty.cols):
+				self.vty.interpret('b')
+			self.vty.interpret('\n')
+			self.vty.interpret('\r')
+
+		for col in range(self.vty.cols):
+			self.assertCellChar(8, col, 'a')
+			self.assertCellChar(9, col, 'b')
+			self.assertCellChar(10, col, 'b')
+			self.assertCellChar(11, col, '')
+			self.assertCellChar(12, col, 'a')
+			self.assertCellChar(13, col, 'a')
 
 class VttyTests(TerminalTestCase):
 	'''Test the Vtty class'''

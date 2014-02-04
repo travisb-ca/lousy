@@ -96,6 +96,8 @@ class DumbTerminal(object):
 	rows = 24
 	cols = 80
 	tabstop = 8
+	margin_top = 0
+	margin_bottom = 23
 
 	# Should the text wrap to the next line when it reaches the end of
 	# the line automatically
@@ -244,10 +246,10 @@ class DumbTerminal(object):
 			else:
 				self.current_col = self.cols - 1
 
-		if self.current_row == self.rows:
+		if self.current_row == self.margin_bottom + 1:
 			if self.autoscroll:
-				del self.framebuffer[0]
-				self.framebuffer.append([FrameBufferCell() for col in range(self.cols)])
+				del self.framebuffer[self.margin_top]
+				self.framebuffer.insert(self.margin_bottom, [FrameBufferCell() for col in range(self.cols)])
 			self.current_row -= 1
 
 	def i_ignore(self, cell, c):
@@ -400,6 +402,8 @@ class VT100(DumbTerminal):
 		self.underscore = False
 		self.blink = False
 		self.reverse = False
+		self.origin_row = 0
+		self.origin_col = 0
 
 		DumbTerminal.__init__(self)
 
@@ -417,6 +421,7 @@ class VT100(DumbTerminal):
 				'default': self.i_csi_collectParams,
 				'f': self.i_csi_placeCursor,
 				'm': self.i_csi_specialGraphics,
+				'r': self.i_csi_setTopBottomMargins,
 				'A': self.i_csi_moveCursorUp,
 				'B': self.i_csi_moveCursorDown,
 				'C': self.i_csi_moveCursorForwards,
@@ -553,6 +558,28 @@ class VT100(DumbTerminal):
 				self.blink = True
 			if attr == '7':
 				self.reverse = True
+
+		self.mode = 'normal'
+
+	def i_csi_setTopBottomMargins(self, cell, c):
+		coords = self.csi_params.split(';')
+		top = 0
+		bottom = self.rows - 1
+
+		if len(coords) >= 2:
+			top = int(coords[0]) - 1
+			bottom = int(coords[1]) - 1
+
+			if bottom <= top or bottom >= self.rows or top < 0:
+				# The scrolling region must be at least two
+				# lines and other cases are errors
+				self.mode = 'normal'
+				print 'exiting early %d %d' % (top, bottom)
+				return
+		self.margin_top = top
+		self.margin_bottom = bottom
+		self.current_row = self.origin_row
+		self.current_col = self.origin_col
 
 		self.mode = 'normal'
 
