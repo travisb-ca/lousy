@@ -763,21 +763,21 @@ class VT100Tests(TerminalTestCase):
 			self.sendEsc('[1D')
 			self.vty.interpret('a')
 			self.vty.interpret('\n')
-		self.placeCursor(0, 20)
+		self.placeCursor(self.top_row, 20)
 
-		self.assertEqual(self.vty.current_row, 0)
+		self.assertEqual(self.vty.current_row, self.top_row)
 
 		self.sendEsc('[B')
 		self.sendEsc('[B')
 		self.sendEsc('[B')
 
-		self.assertEqual(self.vty.current_row, 3)
+		self.assertEqual(self.vty.current_row, self.top_row + 3)
 
 		self.vty.interpret('b')
 
-		self.assertCellChar(2, 20, 'a')
-		self.assertCellChar(3, 20, 'b')
-		self.assertCellChar(4, 20, 'a')
+		self.assertCellChar(self.top_row + 2, 20, 'a')
+		self.assertCellChar(self.top_row + 3, 20, 'b')
+		self.assertCellChar(self.top_row + 4, 20, 'a')
 
 	def test_moveCursorDown_one(self):
 		self.placeCursor(0, 21)
@@ -785,21 +785,21 @@ class VT100Tests(TerminalTestCase):
 			self.sendEsc('[1D')
 			self.vty.interpret('a')
 			self.vty.interpret('\n')
-		self.placeCursor(0, 20)
+		self.placeCursor(self.top_row, 20)
 
-		self.assertEqual(self.vty.current_row, 0)
+		self.assertEqual(self.vty.current_row, self.top_row)
 
 		self.sendEsc('[1B')
 		self.sendEsc('[1B')
 		self.sendEsc('[1B')
 
-		self.assertEqual(self.vty.current_row, 3)
+		self.assertEqual(self.vty.current_row, self.top_row + 3)
 
 		self.vty.interpret('b')
 
-		self.assertCellChar(2, 20, 'a')
-		self.assertCellChar(3, 20, 'b')
-		self.assertCellChar(4, 20, 'a')
+		self.assertCellChar(self.top_row + 2, 20, 'a')
+		self.assertCellChar(self.top_row + 3, 20, 'b')
+		self.assertCellChar(self.top_row + 4, 20, 'a')
 
 	def test_moveCursorDown_zero(self):
 		self.placeCursor(0, 21)
@@ -807,21 +807,21 @@ class VT100Tests(TerminalTestCase):
 			self.sendEsc('[1D')
 			self.vty.interpret('a')
 			self.vty.interpret('\n')
-		self.placeCursor(0, 20)
+		self.placeCursor(self.top_row, 20)
 
-		self.assertEqual(self.vty.current_row, 0)
+		self.assertEqual(self.vty.current_row, self.top_row)
 
 		self.sendEsc('[0B')
 		self.sendEsc('[0B')
 		self.sendEsc('[0B')
 
-		self.assertEqual(self.vty.current_row, 3)
+		self.assertEqual(self.vty.current_row, self.top_row + 3)
 
 		self.vty.interpret('b')
 
-		self.assertCellChar(2, 20, 'a')
-		self.assertCellChar(3, 20, 'b')
-		self.assertCellChar(4, 20, 'a')
+		self.assertCellChar(self.top_row + 2, 20, 'a')
+		self.assertCellChar(self.top_row + 3, 20, 'b')
+		self.assertCellChar(self.top_row + 4, 20, 'a')
 
 	def test_moveCursorDown_arg(self):
 		self.placeCursor(0, 21)
@@ -829,19 +829,19 @@ class VT100Tests(TerminalTestCase):
 			self.sendEsc('[1D')
 			self.vty.interpret('a')
 			self.vty.interpret('\n')
-		self.placeCursor(0, 20)
+		self.placeCursor(self.top_row, 20)
 
-		self.assertEqual(self.vty.current_row, 0)
+		self.assertEqual(self.vty.current_row, self.top_row)
 
 		self.sendEsc('[3B')
 
-		self.assertEqual(self.vty.current_row, 3)
+		self.assertEqual(self.vty.current_row, self.top_row + 3)
 
 		self.vty.interpret('b')
 
-		self.assertCellChar(2, 20, 'a')
-		self.assertCellChar(3, 20, 'b')
-		self.assertCellChar(4, 20, 'a')
+		self.assertCellChar(self.top_row + 2, 20, 'a')
+		self.assertCellChar(self.top_row + 3, 20, 'b')
+		self.assertCellChar(self.top_row + 4, 20, 'a')
 
 	def test_moveCursorDown_downPastMargin(self):
 		self.placeCursor(0, 21)
@@ -849,18 +849,18 @@ class VT100Tests(TerminalTestCase):
 			self.sendEsc('[1D')
 			self.vty.interpret('a')
 			self.vty.interpret('\n')
-		self.placeCursor(0, 20)
+		self.placeCursor(self.top_row, 20)
 
-		self.assertEqual(self.vty.current_row, 0)
+		self.assertEqual(self.vty.current_row, self.top_row)
 
 		self.sendEsc('[300B')
 
-		self.assertEqual(self.vty.current_row, 23)
+		self.assertEqual(self.vty.current_row, self.bottom_row)
 
 		self.vty.interpret('b')
 
-		self.assertCellChar(22, 20, 'a')
-		self.assertCellChar(23, 20, 'b')
+		self.assertCellChar(self.bottom_row - 1, 20, 'a')
+		self.assertCellChar(self.bottom_row, 20, 'b')
 
 	def test_eraseLine_toEnd_default(self):
 		for i in range(self.vty.cols - 1):
@@ -928,21 +928,21 @@ class VT100Tests(TerminalTestCase):
 			self.sendEsc('[1D')
 			self.vty.interpret('a')
 			self.vty.interpret('\n')
-		self.placeCursor(0, 20)
+		self.placeCursor(self.top_row, 20)
 
-		self.assertEqual(self.vty.current_row, 0)
+		self.assertEqual(self.vty.current_row, self.top_row)
 
 		self.sendEsc('D')
 		self.sendEsc('D')
 		self.sendEsc('D')
 
-		self.assertEqual(self.vty.current_row, 3)
+		self.assertEqual(self.vty.current_row, self.top_row + 3)
 
 		self.vty.interpret('b')
 
-		self.assertCellChar(2, 20, 'a')
-		self.assertCellChar(3, 20, 'b')
-		self.assertCellChar(4, 20, 'a')
+		self.assertCellChar(self.top_row + 2, 20, 'a')
+		self.assertCellChar(self.top_row + 3, 20, 'b')
+		self.assertCellChar(self.top_row + 4, 20, 'a')
 
 	def test_moveCursorDown_escape_pastMargin(self):
 		self.placeCursor(0, 21)
@@ -950,29 +950,32 @@ class VT100Tests(TerminalTestCase):
 			self.sendEsc('[1D')
 			self.vty.interpret('%s' % str(i % 10))
 			self.vty.interpret('\n')
-		self.placeCursor(0, 20)
+		self.placeCursor(self.top_row, 20)
 
-		self.assertEqual(self.vty.current_row, 0)
+		self.assertEqual(self.vty.current_row, self.top_row)
 
-		for i in range(23):
+		for i in range(self.bottom_row - self.top_row):
 			# Move to bottom of screen
 			self.sendEsc('D')
-		self.assertEqual(self.vty.current_row, 23)
+		self.assertEqual(self.vty.current_row, self.bottom_row)
 
 		# Scroll off the bottom
 		self.sendEsc('D')
 		self.sendEsc('D')
 		self.sendEsc('D')
 
-		self.assertEqual(self.vty.current_row, 23)
+		self.assertEqual(self.vty.current_row, self.bottom_row)
 
 		self.vty.interpret('b')
 
-		self.assertCellChar(19, 20, '2')
-		self.assertCellChar(20, 20, '')
-		self.assertCellChar(21, 20, '')
-		self.assertCellChar(22, 20, '')
-		self.assertCellChar(23, 20, 'b')
+		self.assertCellChar(self.bottom_row - 4, 20, '2')
+		self.assertCellChar(self.bottom_row - 3, 20, '')
+		self.assertCellChar(self.bottom_row - 2, 20, '')
+		self.assertCellChar(self.bottom_row - 1, 20, '')
+		self.assertCellChar(self.bottom_row - 0, 20, 'b')
+
+		if self.bottom_row < self.vty.rows - 1:
+			self.assertCellChar(self.bottom_row + 1, 20, '')
 
 	def test_moveCursorUp_escape(self):
 		self.placeCursor(self.top_row, 21)

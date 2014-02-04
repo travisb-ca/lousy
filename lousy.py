@@ -605,7 +605,7 @@ class VT100(DumbTerminal):
 		if distance == 0:
 			distance = 1
 
-		self.current_row = min(self.rows - 1, self.current_row + distance)
+		self.current_row = min(self.margin_bottom, self.current_row + distance)
 
 		self.mode = 'normal'
 
