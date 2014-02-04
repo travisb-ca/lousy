@@ -1036,13 +1036,13 @@ class VT100Tests(TerminalTestCase):
 			self.sendEsc('[1D')
 			self.vty.interpret('%s' % str(i % 10))
 			self.vty.interpret('\n')
-		self.placeCursor(20, 20)
+		self.placeCursor(self.bottom_row - 3, 20)
 
-		self.assertEqual(self.vty.current_row, 20)
+		self.assertEqual(self.vty.current_row, self.bottom_row - 3)
 
 		self.sendEsc('E')
 
-		self.assertEqual(self.vty.current_row, 21)
+		self.assertEqual(self.vty.current_row, self.bottom_row - 2)
 		self.assertEqual(self.vty.current_col, 0)
 
 		self.sendEsc('E')
@@ -1052,14 +1052,14 @@ class VT100Tests(TerminalTestCase):
 
 		self.vty.interpret('b')
 
-		self.assertEqual(self.vty.current_row, 23)
+		self.assertEqual(self.vty.current_row, self.bottom_row)
 		self.assertEqual(self.vty.current_col, 1)
 
-		self.assertCellChar(19, 20, '1')
-		self.assertCellChar(20, 20, '2')
-		self.assertCellChar(21, 20, '')
-		self.assertCellChar(22, 20, '')
-		self.assertCellChar(23, 20, '')
+		self.assertCellChar(self.bottom_row - 4, 20, '1')
+		self.assertCellChar(self.bottom_row - 3, 20, '2')
+		self.assertCellChar(self.bottom_row - 2, 20, '')
+		self.assertCellChar(self.bottom_row - 1, 20, '')
+		self.assertCellChar(self.bottom_row - 0, 20, '')
 
 	def test_attributeBold(self):
 		self.sendEsc('[1m')
