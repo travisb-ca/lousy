@@ -483,7 +483,7 @@ class VT100(DumbTerminal):
 		self.mode = 'normal'
 
 	def i_escape_cursorUp(self, cell, c):
-		self.current_row = max(0, self.current_row - 1)
+		self.current_row = max(self.margin_top, self.current_row - 1)
 		self.mode = 'normal'
 
 	def i_escape_nextLine(self, cell, c):
@@ -592,7 +592,7 @@ class VT100(DumbTerminal):
 		if distance == 0:
 			distance = 1
 
-		self.current_row = max(0, self.current_row - distance)
+		self.current_row = max(self.margin_top, self.current_row - distance)
 
 		self.mode = 'normal'
 
