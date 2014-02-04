@@ -1208,6 +1208,30 @@ class VT100Tests(TerminalTestCase):
 			self.assertCellChar(12, col, 'a')
 			self.assertCellChar(13, col, 'a')
 
+	def test_setTopBottomMargins_default(self):
+		self.sendEsc('[r')
+
+		self.assertEqual(self.vty.margin_top, 0)
+		self.assertEqual(self.vty.margin_bottom, self.vty.rows - 1)
+
+	def test_setTopBottomMargins_topOnly(self):
+		self.sendEsc('[6r')
+
+		self.assertEqual(self.vty.margin_top, 5)
+		self.assertEqual(self.vty.margin_bottom, self.vty.rows - 1)
+
+	def test_setTopBottomMargins_topOnlySemicolon(self):
+		self.sendEsc('[6;r')
+
+		self.assertEqual(self.vty.margin_top, 5)
+		self.assertEqual(self.vty.margin_bottom, self.vty.rows - 1)
+
+	def test_setTopBottomMargins_bottomOnly(self):
+		self.sendEsc('[;6r')
+
+		self.assertEqual(self.vty.margin_top, 0)
+		self.assertEqual(self.vty.margin_bottom, 5)
+
 class VT100Tests_with_TopBottomMargins(VT100Tests):
 	# Rerun all the VT100 Tests inside restricted top and bottom margins
 	def setUp1(self):

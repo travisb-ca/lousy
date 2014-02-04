@@ -566,16 +566,18 @@ class VT100(DumbTerminal):
 		top = 0
 		bottom = self.rows - 1
 
-		if len(coords) >= 2:
+		if len(coords) >= 1 and coords[0] != '':
 			top = int(coords[0]) - 1
+		if len(coords) >= 2 and coords[1] != '':
 			bottom = int(coords[1]) - 1
 
-			if bottom <= top or bottom >= self.rows or top < 0:
-				# The scrolling region must be at least two
-				# lines and other cases are errors
-				self.mode = 'normal'
-				print 'exiting early %d %d' % (top, bottom)
-				return
+		if bottom <= top or bottom >= self.rows or top < 0:
+			# The scrolling region must be at least two
+			# lines and other cases are errors
+			self.mode = 'normal'
+			print 'exiting early %d %d' % (top, bottom)
+			return
+
 		self.margin_top = top
 		self.margin_bottom = bottom
 		self.current_row = self.origin_row
