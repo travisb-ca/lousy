@@ -416,7 +416,7 @@ class VT100Tests(TerminalTestCase):
 			self.assertCellChar(1, i, '')
 
 	def test_argumentlessCursorPlace(self, echar='f'):
-		for i in range(self.vty.rows - 2):
+		for i in range(self.bottom_row):
 			self.vty.interpret('a')
 			self.vty.interpret('\n')
 
@@ -427,14 +427,14 @@ class VT100Tests(TerminalTestCase):
 		self.vty.interpret('b')
 
 		self.assertCellChar(0, 0, 'b')
-		for i in range(1, self.vty.rows - 2):
+		for i in range(1, self.bottom_row):
 			self.assertCellChar(i, i, 'a')
 
 	def test_argumentlessCursorPlace_variant_H(self):
 		return self.test_argumentlessCursorPlace(echar='H')
 
 	def test_emptyArgumentCursorPlace(self, echar='f'):
-		for i in range(self.vty.rows - 2):
+		for i in range(self.bottom_row):
 			self.vty.interpret('a')
 			self.vty.interpret('\n')
 
@@ -446,32 +446,35 @@ class VT100Tests(TerminalTestCase):
 		self.vty.interpret('b')
 
 		self.assertCellChar(0, 0, 'b')
-		for i in range(1, self.vty.rows - 2):
+		for i in range(1, self.bottom_row):
 			self.assertCellChar(i, i, 'a')
 
 	def test_emptyArgumentCursorPlace_variant_H(self):
 		return self.test_emptyArgumentCursorPlace(echar='H')
 
 	def test_argumentCursorPlace(self, echar='f'):
-		for i in range(self.vty.rows - 2):
+		for i in range(self.bottom_row):
 			self.vty.interpret('a')
 			self.vty.interpret('\n')
 
 		self.vty.interpret(chr(0x1b))
 		self.vty.interpret('[')
-		self.vty.interpret('2')
-		self.vty.interpret('0')
+		row = self.top_row + 3
+		if row > 10:
+			self.vty.interpret(str(row % 100)[1])
+		self.vty.interpret(str(row % 10))
 		self.vty.interpret(';')
-		self.vty.interpret('2')
-		self.vty.interpret('0')
+		if row > 10:
+			self.vty.interpret(str(row % 100)[1])
+		self.vty.interpret(str(row % 10))
 		self.vty.interpret(echar)
 		
 		self.vty.interpret('b')
 
 		# cells are 1-indexed in the spec
-		self.assertCellChar(19, 19, 'b')
-		for i in range(self.vty.rows - 2):
-			if i != 19:
+		self.assertCellChar(row - 1, row - 1, 'b')
+		for i in range(self.bottom_row):
+			if i != row - 1:
 				self.assertCellChar(i, i, 'a')
 
 	def test_argumentCursorPlace_variant_H(self):
