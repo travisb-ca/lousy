@@ -460,11 +460,11 @@ class VT100Tests(TerminalTestCase):
 		self.vty.interpret(chr(0x1b))
 		self.vty.interpret('[')
 		row = self.top_row + 3
-		if row > 10:
+		if row >= 10:
 			self.vty.interpret(str(row % 100)[1])
 		self.vty.interpret(str(row % 10))
 		self.vty.interpret(';')
-		if row > 10:
+		if row >= 10:
 			self.vty.interpret(str(row % 100)[1])
 		self.vty.interpret(str(row % 10))
 		self.vty.interpret(echar)
