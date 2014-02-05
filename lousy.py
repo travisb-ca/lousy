@@ -107,6 +107,10 @@ class DumbTerminal(object):
 	# in the bottom-most line of the terminal
 	autoscroll = True
 
+	# Does a linefeed (\n) character move down one line (False) or down one
+	# line and back to the beginning of the line (True)?
+	linefeed_mode = False
+
 	def __init__(self):
 		self.current_row = 0
 		self.current_col = 0
@@ -158,7 +162,6 @@ class DumbTerminal(object):
 			sys.stdout.write(' ')
 		else:
 			sys.stdout.write(cell.char)
-
 
 	def dumpFrameBuffer(self):
 		'''Print out the characters of the framebuffer as it stands. Note that this is
@@ -218,7 +221,6 @@ class DumbTerminal(object):
 		for col in range(self.cols):
 			sys.stdout.write('%s' % str(col % 10))
 		sys.stdout.write('\n')
-
 
 	def cell(self, row, col):
 		'''Retreive the FrameBufferCell for the given location. Returns None if the cell is out of range.
@@ -285,6 +287,9 @@ class DumbTerminal(object):
 
 	def i_normal_newline(self, cell, c):
 		self.current_row += 1
+
+		if self.linefeed_mode:
+			self.current_col = 0
 
 	def i_normal_carriageReturn(self, cell, c):
 		self.current_col = 0
@@ -420,6 +425,7 @@ class VT100(DumbTerminal):
 		self.modes['csi'] = {
 				'default': self.i_csi_collectParams,
 				'f': self.i_csi_placeCursor,
+				'h': self.i_csi_setMode,
 				'm': self.i_csi_specialGraphics,
 				'r': self.i_csi_setTopBottomMargins,
 				'A': self.i_csi_moveCursorUp,
@@ -536,6 +542,19 @@ class VT100(DumbTerminal):
 				# Assume 'l;c'
 				self.current_row = max(int(coords[0]) - 1, 0)
 				self.current_col = max(int(coords[1]) - 1, 0)
+		self.mode = 'normal'
+
+	def i_csi_setMode(self, cell, c):
+		modes = self.csi_params.split(';')
+		for mode in modes:
+			if len(mode) == 0:
+				continue
+
+			if mode == '20':
+				self.linefeed_mode = True
+			else:
+				print 'Unsupported mode %s' % mode
+
 		self.mode = 'normal'
 
 	def i_csi_specialGraphics(self, cell, c):

@@ -1253,6 +1253,28 @@ class VT100Tests(TerminalTestCase):
 		self.assertEqual(self.vty.margin_top, self.top_row)
 		self.assertEqual(self.vty.margin_bottom, self.bottom_row)
 
+	def test_setMode(self):
+		self.assertEqual(self.vty.linefeed_mode, False)
+		self.sendEsc('[20h')
+		self.assertEqual(self.vty.linefeed_mode, True)
+
+	def test_linefeedMode(self):
+		self.assertEqual(self.vty.linefeed_mode, False)
+
+		self.placeCursor(self.top_row, 30)
+		self.vty.interpret('\n')
+
+		self.assertEqual(self.vty.current_col, 30)
+		self.assertEqual(self.vty.current_row, self.top_row + 1)
+
+		self.sendEsc('[20h')
+
+		self.placeCursor(self.top_row, 30)
+		self.vty.interpret('\n')
+
+		self.assertEqual(self.vty.current_col, 0)
+		self.assertEqual(self.vty.current_row, self.top_row + 1)
+
 class VT100Tests_with_TopBottomMargins(VT100Tests):
 	# Rerun all the VT100 Tests inside restricted top and bottom margins
 	def setUp1(self):
