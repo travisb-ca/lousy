@@ -545,16 +545,20 @@ class VT100(DumbTerminal):
 				self.current_col = max(int(coords[1]) - 1, 0)
 		self.mode = 'normal'
 
+	def termMode(self, mode, value):
+		# Decode the mode and set the value as appropriate
+		if mode == '20':
+			self.linefeed_mode = value
+		else:
+			print 'Unsupported mode %s' % mode
+
 	def i_csi_setMode(self, cell, c):
 		modes = self.csi_params.split(';')
 		for mode in modes:
 			if len(mode) == 0:
 				continue
 
-			if mode == '20':
-				self.linefeed_mode = True
-			else:
-				print 'Unsupported mode %s' % mode
+			self.termMode(mode, True)
 
 		self.mode = 'normal'
 
@@ -564,10 +568,7 @@ class VT100(DumbTerminal):
 			if len(mode) == 0:
 				continue
 
-			if mode == '20':
-				self.linefeed_mode = False
-			else:
-				print 'Unsupported mode %s' % mode
+			self.termMode(mode, False)
 
 		self.mode = 'normal'
 
