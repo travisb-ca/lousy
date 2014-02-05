@@ -426,6 +426,7 @@ class VT100(DumbTerminal):
 				'default': self.i_csi_collectParams,
 				'f': self.i_csi_placeCursor,
 				'h': self.i_csi_setMode,
+				'l': self.i_csi_resetMode,
 				'm': self.i_csi_specialGraphics,
 				'r': self.i_csi_setTopBottomMargins,
 				'A': self.i_csi_moveCursorUp,
@@ -552,6 +553,19 @@ class VT100(DumbTerminal):
 
 			if mode == '20':
 				self.linefeed_mode = True
+			else:
+				print 'Unsupported mode %s' % mode
+
+		self.mode = 'normal'
+
+	def i_csi_resetMode(self, cell, c):
+		modes = self.csi_params.split(';')
+		for mode in modes:
+			if len(mode) == 0:
+				continue
+
+			if mode == '20':
+				self.linefeed_mode = False
 			else:
 				print 'Unsupported mode %s' % mode
 

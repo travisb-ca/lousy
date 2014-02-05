@@ -1258,6 +1258,12 @@ class VT100Tests(TerminalTestCase):
 		self.sendEsc('[20h')
 		self.assertEqual(self.vty.linefeed_mode, True)
 
+	def test_resetMode(self):
+		self.assertEqual(self.vty.linefeed_mode, False)
+		self.sendEsc('[20h')
+		self.sendEsc('[20l')
+		self.assertEqual(self.vty.linefeed_mode, False)
+
 	def test_linefeedMode(self):
 		self.assertEqual(self.vty.linefeed_mode, False)
 
