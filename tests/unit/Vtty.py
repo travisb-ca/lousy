@@ -1232,6 +1232,20 @@ class VT100Tests(TerminalTestCase):
 		self.assertEqual(self.vty.margin_top, 0)
 		self.assertEqual(self.vty.margin_bottom, 5)
 
+	def test_setTopBottomMargins_reversed(self):
+		self.sendEsc(']10;9r')
+		# The above code should be ignored
+		
+		self.assertEqual(self.vty.margin_top, self.top_row)
+		self.assertEqual(self.vty.margin_bottom, self.bottom_row)
+
+	def test_setTopBottomMargins_equal(self):
+		self.sendEsc(']9;9r')
+		# The above code should be ignored
+		
+		self.assertEqual(self.vty.margin_top, self.top_row)
+		self.assertEqual(self.vty.margin_bottom, self.bottom_row)
+
 class VT100Tests_with_TopBottomMargins(VT100Tests):
 	# Rerun all the VT100 Tests inside restricted top and bottom margins
 	def setUp1(self):
