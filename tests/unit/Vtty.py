@@ -1246,6 +1246,13 @@ class VT100Tests(TerminalTestCase):
 		self.assertEqual(self.vty.margin_top, self.top_row)
 		self.assertEqual(self.vty.margin_bottom, self.bottom_row)
 
+	def test_setTopBottomMargins_outOfRange(self):
+		self.sendEsc(']-10;999r')
+		# The above code should be ignored
+		
+		self.assertEqual(self.vty.margin_top, self.top_row)
+		self.assertEqual(self.vty.margin_bottom, self.bottom_row)
+
 class VT100Tests_with_TopBottomMargins(VT100Tests):
 	# Rerun all the VT100 Tests inside restricted top and bottom margins
 	def setUp1(self):
