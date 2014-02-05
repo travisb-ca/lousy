@@ -545,8 +545,11 @@ class VT100(DumbTerminal):
 				self.current_col = max(int(coords[1]) - 1, 0)
 		self.mode = 'normal'
 
-	def termMode(self, mode, value):
+	def decodeTermMode(self, mode, value):
 		# Decode the mode and set the value as appropriate
+		# Children of this class should override this method as
+		# appropriate, making sure to call the superclass for any
+		# unknown modes.
 		if mode == '20':
 			self.linefeed_mode = value
 		else:
@@ -558,7 +561,7 @@ class VT100(DumbTerminal):
 			if len(mode) == 0:
 				continue
 
-			self.termMode(mode, True)
+			self.decodeTermMode(mode, True)
 
 		self.mode = 'normal'
 
@@ -568,7 +571,7 @@ class VT100(DumbTerminal):
 			if len(mode) == 0:
 				continue
 
-			self.termMode(mode, False)
+			self.decodeTermMode(mode, False)
 
 		self.mode = 'normal'
 
