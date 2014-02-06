@@ -104,9 +104,7 @@ class SimpleStubTests(StubTestCase):
 
 		send(self.sock, 'SimpleStub,id1')
 
-		self.stub = lousy.stubs.newest()
-		while self.stub is None:
-			self.stub = lousy.stubs.newest()
+		self.stub = lousy.stubs.waitForStub()
 
 	def tearDown1(self):
 		if self.sock:
@@ -126,14 +124,14 @@ class SimpleStubTests(StubTestCase):
 		return buf
 
 	def test_writeToStub(self):
-		s = 'This is a test'
+		s = 'This is a write test'
 		self.send(s)
 
 		t = self.stub.read()
 		self.assertEqual(s, t)
 
 	def test_readFromStub(self):
-		s = 'This is a test'
+		s = 'This is a read test'
 		self.stub.write(s)
 
 		t = self.recv()

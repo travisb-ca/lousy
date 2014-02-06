@@ -1,0 +1,8 @@
+Attachment: 
+Attachment-filename: 
+Attachment-type: application/octet-stream
+Date: 2014-02-06 06:13:33
+Parent: issue
+User: travisb@travisbrown.ca
+--
+The issue was that the test was using lousy.stubs.newest, which was returning the old last created stub. The test was still passing because of another bug where all stubs shared on pair of in/out buffers.
