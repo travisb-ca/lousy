@@ -1128,8 +1128,8 @@ class Stub(asyncore.dispatcher):
 	   as part of __init__, self.type to the string you intend to
 	   register this class for.
 	'''
-	in_buf = []
-	out_buf = []
+	in_buf = None
+	out_buf = None
 	read_ready = None # Is there data to be read
 	lock = None
 	_disconnect = False
@@ -1138,6 +1138,8 @@ class Stub(asyncore.dispatcher):
 		asyncore.dispatcher.__init__(self, sock, map)
 		self.read_ready = threading.Event()
 		self.lock = threading.Lock()
+		self.in_buf = []
+		self.out_buf = []
 
 	def writable(self):
 		if len(self.out_buf) > 0:
