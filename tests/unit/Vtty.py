@@ -1314,6 +1314,17 @@ class VT100Tests(TerminalTestCase):
 		self.vty.interpret('c')
 		self.assertCellChar(self.top_row + 3, 0, 'c')
 
+	def test_relativeOriginMode_reset(self):
+		self.sendEsc('[6h')
+		self.sendEsc('[10r')
+		self.vty.interpret('a')
+
+		self.assertCellChar(self.top_row + 9, 0, 'a')
+
+		self.sendEsc('[6l')
+		self.vty.interpret('b')
+		self.assertCellChar(0, 0, 'b')
+
 class VT100Tests_with_TopBottomMargins(VT100Tests):
 	# Rerun all the VT100 Tests inside restricted top and bottom margins
 	def setUp1(self):
