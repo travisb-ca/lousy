@@ -402,6 +402,10 @@ class VT100(DumbTerminal):
 		self.cols = 80
 		self.autowrap = False
 
+		# Do line number ignore the configured margins (False) or are
+		# they relative to the configured margins (True)
+		self.origin_relative = False
+
 		# Character attributes for characters as they come in
 		self.bold = False
 		self.underscore = False
@@ -530,19 +534,30 @@ class VT100(DumbTerminal):
 		self.mode = 'normal'
 
 	def i_csi_placeCursor(self, cell, c):
-		if self.csi_params == '':
-			self.current_row = 0
-			self.current_col = 0
+		if self.origin_relative:
+			home_row = self.margin_top
+			home_col = 0
+			rows = self.margin_bottom - self.margin_top + 1
 		else:
+			home_row = 0
+			home_col = 0
+			rows = self.rows
+
+		if self.csi_params == '' or self.csi_params == ';':
+			# Received ';' so go to the origin
+			self.current_row = home_row
+			self.current_col = home_col
+		else:
+			# Assume 'l;c'
 			coords = self.csi_params.split(';')
-			if coords == ['', '']:
-				# Received ';' so go to 0,0
-				self.current_row = 0
-				self.current_col = 0
-			else:
-				# Assume 'l;c'
-				self.current_row = max(int(coords[0]) - 1, 0)
-				self.current_col = max(int(coords[1]) - 1, 0)
+			new_row = max(int(coords[0]) - 1, 0)
+			new_col = max(int(coords[1]) - 1, 0)
+
+			if new_col < self.cols and new_row < rows:
+				# Ignore requests to move outside the allowable view
+				self.current_row = new_row + home_row
+				self.current_col = new_col + home_col
+
 		self.mode = 'normal'
 
 	def decodeTermMode(self, mode, value):
@@ -552,6 +567,17 @@ class VT100(DumbTerminal):
 		# unknown modes.
 		if mode == '20':
 			self.linefeed_mode = value
+		elif mode == '6':
+			self.origin_relative = value
+
+			if value:
+				self.origin_row = self.margin_top
+				self.origin_col = 0
+			else:
+				self.origin_row = 0
+				self.origin_col = 0
+			self.current_row = self.origin_row
+			self.current_col = self.origin_col
 		else:
 			print 'Unsupported mode %s' % mode
 
@@ -600,23 +626,38 @@ class VT100(DumbTerminal):
 
 	def i_csi_setTopBottomMargins(self, cell, c):
 		coords = self.csi_params.split(';')
-		top = 0
-		bottom = self.rows - 1
+
+		if self.origin_relative:
+			top = self.margin_top
+			bottom = self.margin_bottom - self.margin_top
+			num_rows = self.margin_bottom - self.margin_top + 1
+		else:
+			top = 0
+			bottom = self.rows - 1
+			num_rows = self.rows
 
 		if len(coords) >= 1 and coords[0] != '':
 			top = int(coords[0]) - 1
 		if len(coords) >= 2 and coords[1] != '':
 			bottom = int(coords[1]) - 1
 
-		if bottom <= top or bottom >= self.rows or top < 0:
+		if bottom <= top \
+		   or bottom >= num_rows \
+		   or top < 0:
 			# The scrolling region must be at least two
 			# lines and other cases are errors
 			self.mode = 'normal'
-			print 'exiting early %d %d' % (top, bottom)
+			print 'exiting early %d %d %d %d %d' % (top, bottom, self.margin_top, self.margin_bottom, num_rows)
 			return
 
-		self.margin_top = top
-		self.margin_bottom = bottom
+		self.margin_top = self.origin_row + top
+		self.margin_bottom = self.origin_row + bottom
+
+		# If we are in relative origin mode we've reduced out window
+		# size, adjust that before moving the cursor
+		if self.origin_relative:
+			self.origin_row = self.margin_top
+
 		self.current_row = self.origin_row
 		self.current_col = self.origin_col
 

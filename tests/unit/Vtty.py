@@ -1281,6 +1281,39 @@ class VT100Tests(TerminalTestCase):
 		self.assertEqual(self.vty.current_col, 0)
 		self.assertEqual(self.vty.current_row, self.top_row + 1)
 
+	def test_relativeOriginMode(self):
+		# 1-indexed command, but bottom_row is already decremented
+		self.sendEsc('[%d;%dr' % (self.top_row + 2, self.bottom_row - 1))
+		self.sendEsc('[6h')
+
+		self.assertEqual(self.vty.current_row, self.top_row + 1)
+
+		self.placeCursor(0, 0)
+		self.assertEqual(self.vty.current_row, self.top_row + 1)
+
+		for i in range(self.bottom_row - self.top_row + 10):
+			self.vty.interpret('\n')
+			self.vty.interpret('a')
+		self.vty.interpret('\n')
+		self.vty.interpret('a')
+
+		self.assertEqual(self.vty.current_row, self.bottom_row - 2)
+
+	def test_relativeOriginMode_setTopBottomMargin(self):
+		# 1-indexed command, but bottom_row is already decremented
+		self.sendEsc('[%dr' % (self.top_row + 2))
+
+		self.vty.interpret('a')
+		self.assertCellChar(0, 0, 'a')
+
+		self.sendEsc('[6h')
+		self.vty.interpret('b')
+		self.assertCellChar(self.top_row + 1, 0, 'b')
+
+		self.sendEsc('[%dr' % 3)
+		self.vty.interpret('c')
+		self.assertCellChar(self.top_row + 3, 0, 'c')
+
 class VT100Tests_with_TopBottomMargins(VT100Tests):
 	# Rerun all the VT100 Tests inside restricted top and bottom margins
 	def setUp1(self):
