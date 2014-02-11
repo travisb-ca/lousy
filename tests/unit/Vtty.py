@@ -1325,6 +1325,25 @@ class VT100Tests(TerminalTestCase):
 		self.vty.interpret('b')
 		self.assertCellChar(0, 0, 'b')
 
+	def test_saveCursor(self):
+		self.placeCursor(self.top_row + 3, 20)
+		self.sendEsc('[4m')
+
+		self.sendEsc('7')
+
+		self.placeCursor(self.top_row + 5, 40)
+
+		self.sendEsc('[0m')
+
+		self.assertEqual(self.vty.saved, {
+			'bold': False,
+			'underscore': True,
+			'blink': False,
+			'reverse': False,
+			'current_row': self.top_row + 3,
+			'current_col': 20
+			})
+
 class VT100Tests_with_TopBottomMargins(VT100Tests):
 	# Rerun all the VT100 Tests inside restricted top and bottom margins
 	def setUp1(self):

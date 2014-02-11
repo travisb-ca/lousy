@@ -414,6 +414,9 @@ class VT100(DumbTerminal):
 		self.origin_row = 0
 		self.origin_col = 0
 
+		# Saved cursor info (if any)
+		self.saved = None
+
 		DumbTerminal.__init__(self)
 
 		self.modes['normal'][chr(0x1b)] = self.i_normal_escape
@@ -421,6 +424,7 @@ class VT100(DumbTerminal):
 		self.modes['escape'] = {
 				'default': self.i_escape_exit,
 				'[': self.i_escape_csi,
+				'7': self.i_escape_saveCursor,
 				'D': self.i_escape_cursorDown,
 				'E': self.i_escape_nextLine,
 				'M': self.i_escape_cursorUp,
@@ -488,6 +492,18 @@ class VT100(DumbTerminal):
 	def i_escape_csi(self, cell, c):
 		self.mode = 'csi'
 		self.csi_params = ''
+
+	def i_escape_saveCursor(self, cell, c):
+		self.saved = {
+				'bold'        : self.bold,
+				'underscore'  : self.underscore,
+				'blink'       : self.blink,
+				'reverse'     : self.reverse,
+				'current_row' : self.current_row,
+				'current_col' : self.current_col,
+				}
+
+		self.mode = 'normal'
 
 	def i_escape_cursorDown(self, cell, c):
 		self.current_row += 1
