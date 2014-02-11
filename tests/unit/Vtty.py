@@ -1344,6 +1344,42 @@ class VT100Tests(TerminalTestCase):
 			'current_col': 20
 			})
 
+	def test_restoreCursor(self):
+		self.placeCursor(self.top_row + 3, 20)
+		self.sendEsc('[4m')
+
+		self.sendEsc('7')
+
+		self.placeCursor(self.top_row + 5, 40)
+
+		self.sendEsc('[0m')
+
+		self.sendEsc('8')
+
+		self.assertEqual(self.vty.bold, False)
+		self.assertEqual(self.vty.underscore, True)
+		self.assertEqual(self.vty.blink, False)
+		self.assertEqual(self.vty.reverse, False)
+		self.assertEqual(self.vty.current_row, self.top_row + 3)
+		self.assertEqual(self.vty.current_col, 20)
+
+	def test_restoreCursor_noSave(self):
+		self.placeCursor(self.top_row + 3, 20)
+		self.sendEsc('[4m')
+
+		self.placeCursor(self.top_row + 5, 40)
+
+		self.sendEsc('[0m')
+
+		self.sendEsc('8')
+
+		self.assertEqual(self.vty.bold, False)
+		self.assertEqual(self.vty.underscore, False)
+		self.assertEqual(self.vty.blink, False)
+		self.assertEqual(self.vty.reverse, False)
+		self.assertEqual(self.vty.current_row, self.top_row + 5)
+		self.assertEqual(self.vty.current_col, 40)
+
 class VT100Tests_with_TopBottomMargins(VT100Tests):
 	# Rerun all the VT100 Tests inside restricted top and bottom margins
 	def setUp1(self):
