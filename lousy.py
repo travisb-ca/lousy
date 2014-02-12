@@ -270,12 +270,16 @@ class DumbTerminal(object):
 		if self.current_col > 0:
 			self.current_col -= 1
 
-	def i_normal_tab(self, cell, c):
+	def nextTabstop(self, col):
 		# Emulate fixed tab stops
-
-		tabstop = int((self.current_col + self.tabstop)/self.tabstop) * self.tabstop
+		tabstop = int((col + self.tabstop)/self.tabstop) * self.tabstop
 		if tabstop >= self.cols:
 			tabstop = self.cols - 1
+
+		return tabstop
+
+	def i_normal_tab(self, cell, c):
+		tabstop = self.nextTabstop(self.current_col)
 
 		# If the tabstop would move beyond the edge of the
 		# screen and overwrite the last character don't
@@ -417,6 +421,9 @@ class VT100(DumbTerminal):
 		# Saved cursor info (if any)
 		self.saved = None
 
+		# The tabstops, default state it to have one every 8 chars. Stopping at the rightmost cell is implicit
+		self.tabstops = [i for i in range(0, self.cols, 8)]
+
 		DumbTerminal.__init__(self)
 
 		self.modes['normal'][chr(0x1b)] = self.i_normal_escape
@@ -440,6 +447,7 @@ class VT100(DumbTerminal):
 		self.modes['csi'] = {
 				'default': self.i_csi_collectParams,
 				'f': self.i_csi_placeCursor,
+				'g': self.i_csi_tabStopClear,
 				'h': self.i_csi_setMode,
 				'l': self.i_csi_resetMode,
 				'm': self.i_csi_specialGraphics,
@@ -466,6 +474,13 @@ class VT100(DumbTerminal):
 			cell.attributes.add(FrameBufferCell.BLINK)
 		if self.reverse:
 			cell.attributes.add(FrameBufferCell.REVERSE)
+
+	def nextTabstop(self, col):
+		for stop in self.tabstops:
+			if stop > col:
+				return stop
+		# Default as the rightmost cell
+		return self.cols - 1
 
 	def dumpCell(self, cell):
 		def escWrite(s):
@@ -610,6 +625,18 @@ class VT100(DumbTerminal):
 				# Ignore requests to move outside the allowable view
 				self.current_row = new_row + home_row
 				self.current_col = new_col + home_col
+
+		self.mode = 'normal'
+
+	def i_csi_tabStopClear(self, cell, c):
+		if self.csi_params == '' or self.csi_params == '0':
+			try:
+				del self.tabstops[self.tabstops.index(self.current_col)]
+			except:
+				# The tabstop wasn't previously set as a tabstop, all is fine
+				pass
+		elif self.csi_params == '3':
+			self.tabstops = []
 
 		self.mode = 'normal'
 

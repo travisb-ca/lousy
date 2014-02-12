@@ -1417,6 +1417,28 @@ class VT100Tests(TerminalTestCase):
 			for col in range(self.vty.cols):
 				self.assertCellChar(row, col, 'E')
 
+	def test_clearTabStops(self):
+		self.sendEsc('[3g')
+
+		self.assertEqual(self.vty.current_col, 0)
+
+		self.vty.interpret('\t')
+
+		self.assertEqual(self.vty.current_col, self.vty.cols - 1)
+
+	def test_clearTabStop(self):
+		self.vty.interpret('\t')
+		firstTab = self.vty.current_col
+		self.sendEsc('[0g')
+		self.vty.interpret('a')
+		self.assertCellChar(0, 8, 'a')
+
+		self.placeCursor(self.top_row, 0)
+
+		self.vty.interpret('\t')
+		self.assertNotEqual(self.vty.current_col, firstTab)
+		self.assertEqual(self.vty.current_col, 2 * firstTab)
+
 class VT100Tests_with_TopBottomMargins(VT100Tests):
 	# Rerun all the VT100 Tests inside restricted top and bottom margins
 	def setUp1(self):
