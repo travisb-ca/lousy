@@ -522,7 +522,14 @@ class VT100(DumbTerminal):
 		self.mode = 'normal'
 
 	def i_escape_cursorUp(self, cell, c):
-		self.current_row = max(self.margin_top, self.current_row - 1)
+		self.current_row = max(self.margin_top - 1, self.current_row - 1)
+
+		if self.current_row == self.margin_top - 1:
+			# Scroll down one line
+			del self.framebuffer[self.margin_bottom]
+			self.framebuffer.insert(self.margin_top, [FrameBufferCell() for col in range(self.cols)])
+			self.current_row += 1
+
 		self.mode = 'normal'
 
 	def i_escape_nextLine(self, cell, c):

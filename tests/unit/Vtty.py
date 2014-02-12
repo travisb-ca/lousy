@@ -1020,10 +1020,18 @@ class VT100Tests(TerminalTestCase):
 			self.sendEsc('M')
 		self.assertEqual(self.vty.current_row, self.top_row)
 
+		# Put something in the top line to be scrolled down
+		self.vty.interpret('a')
+		self.sendEsc('[1D')
+
 		# Scroll off the top
 		self.sendEsc('M')
 		self.sendEsc('M')
 		self.sendEsc('M')
+
+		self.assertCellChar(self.top_row,     20, '')
+		self.assertCellChar(self.top_row + 1, 20, '')
+		self.assertCellChar(self.top_row + 2, 20, '')
 
 		self.assertEqual(self.vty.current_row, self.top_row)
 
@@ -1031,7 +1039,7 @@ class VT100Tests(TerminalTestCase):
 
 		self.assertCellChar(self.top_row + 0, 20, 'b')
 		for i in range(1, 5):
-			self.assertCellChar(self.top_row + i, 20, str(i % 10))
+			self.assertCellChar(self.top_row + 3 + i, 20, str(i % 10))
 
 	def test_nextLine(self):
 		self.placeCursor(0, 21)
