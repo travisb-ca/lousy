@@ -1,0 +1,18 @@
+Component: Vtty
+Date: 2014-02-12 06:15:54
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Eventually
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Minor
+State: Open
+Title: vt100 double width lines
+Type: Feature
+Units_of_Work: 1000
+--
+Implement the terminal double width line option

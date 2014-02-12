@@ -1,0 +1,18 @@
+Component: Vtty
+Date: 2014-02-12 06:13:24
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Eventually
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Major
+State: Open
+Title: vt100 132 column mode
+Type: Feature
+Units_of_Work: 1000
+--
+VT100's support switching between 80 and 132 column modes. Implement this option.

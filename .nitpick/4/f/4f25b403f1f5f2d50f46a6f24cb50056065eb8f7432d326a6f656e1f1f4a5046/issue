@@ -1,0 +1,18 @@
+Component: Vtty
+Date: 2014-02-12 06:18:00
+Depends_On: c92b346c0cb0af7f5f0b3234f6ad28af88094a8f5d3a8188d812bab3eabfce1a
+Duplicate_Of: 
+Fix_By: Eventually
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Minor
+State: Open
+Title: vt100 identify terminal escape
+Type: Feature
+Units_of_Work: 1000
+--
+Implement the vt100 identify terminal escape code.

@@ -1,0 +1,18 @@
+Component: Vtty
+Date: 2014-02-12 06:23:49
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Eventually
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Trivial
+State: Open
+Title: vt100 programmable LEDs
+Type: Feature
+Units_of_Work: 1000
+--
+Real VT100s support setting the keyboard LEDs. For completeness we should do the same, even though almost nobody else does.

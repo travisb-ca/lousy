@@ -1,0 +1,18 @@
+Component: Vtty
+Date: 2014-02-12 06:12:31
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Eventually
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Major
+State: Open
+Title: vt100 VT52 mode
+Type: Feature
+Units_of_Work: 1000
+--
+The VT100 has an option to configure it to act like a VT52. Implement this mode.
