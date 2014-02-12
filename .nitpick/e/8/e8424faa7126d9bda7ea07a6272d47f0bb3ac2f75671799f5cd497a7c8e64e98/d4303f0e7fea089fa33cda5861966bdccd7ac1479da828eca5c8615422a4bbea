@@ -1,0 +1,8 @@
+Attachment: 
+Attachment-filename: 
+Attachment-type: application/octet-stream
+Date: 2014-02-12 05:07:07
+Parent: issue
+User: travisb@travisbrown.ca
+--
+More specifically, it might be that case that a scrollback buffer is needed for this scroll back. Currently scrolling down is implemented by creating a new line since there is no scrollback buffer.

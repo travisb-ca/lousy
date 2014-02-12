@@ -1,0 +1,20 @@
+Component: Vtty
+Date: 2014-02-12 05:09:48
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Eventually
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Minor
+State: Open
+Title: Bidirectional TTY emulation
+Type: Feature
+Units_of_Work: 1000
+--
+There are some, not terribly many but some, terminal control codes which have the terminal send a response to the host. Currently the VTTY infrastructure works off a mirrored output and so doesn't have the capability to respond. This should be supported in order to really be complete.
+
+The biggest question is how to rationalize this with the character-based and line-based process interaction models.
