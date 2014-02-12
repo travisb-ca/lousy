@@ -429,6 +429,12 @@ class VT100(DumbTerminal):
 				'D': self.i_escape_cursorDown,
 				'E': self.i_escape_nextLine,
 				'M': self.i_escape_cursorUp,
+				'#': self.i_escape_private,
+				}
+
+		self.modes['private'] = {
+				'default': self.i_private_exit,
+				'8': self.i_private_EFill,
 				}
 
 		self.modes['csi'] = {
@@ -536,6 +542,18 @@ class VT100(DumbTerminal):
 		self.current_row += 1
 		self.current_col = 0
 		self.mode = 'normal'
+
+	def i_escape_private(self, cell, c):
+		self.mode = 'private'
+
+	def i_private_exit(self, cell, c):
+		self.mode = 'normal'
+
+	def i_private_EFill(self, cell, c):
+		for row in range(self.rows):
+			for col in range(self.cols):
+				cell = self.cell(row, col)
+				cell.char = 'E'
 
 	def i_csi_collectParams(self, cell, c):
 		self.csi_params += c

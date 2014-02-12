@@ -1407,6 +1407,16 @@ class VT100Tests(TerminalTestCase):
 		self.assertCellChar(0, self.vty.cols - 1, '%d' % ((self.vty.cols + 9) % 10))
 		self.assertCellChar(1, 10, 'a')
 
+	def test_EFill(self):
+		for row in range(30):
+			self.vty.interpret('a')
+
+		self.sendEsc('#8')
+
+		for row in range(self.vty.rows):
+			for col in range(self.vty.cols):
+				self.assertCellChar(row, col, 'E')
+
 class VT100Tests_with_TopBottomMargins(VT100Tests):
 	# Rerun all the VT100 Tests inside restricted top and bottom margins
 	def setUp1(self):
