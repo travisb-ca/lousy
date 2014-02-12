@@ -1380,6 +1380,25 @@ class VT100Tests(TerminalTestCase):
 		self.assertEqual(self.vty.current_row, self.top_row + 5)
 		self.assertEqual(self.vty.current_col, 40)
 
+	def test_noAutowrap(self):
+		for col in range(self.vty.cols + 10):
+			self.vty.interpret('%d' % (col % 10))
+
+		self.vty.interpret('a')
+
+		self.assertCellChar(0, self.vty.cols - 1, 'a')
+
+	def test_setAutowrap(self):
+		self.sendEsc('[7h')
+
+		for col in range(self.vty.cols + 10):
+			self.vty.interpret('%d' % (col % 10))
+
+		self.vty.interpret('a')
+
+		self.assertCellChar(0, self.vty.cols - 1, '%d' % ((self.vty.cols + 9) % 10))
+		self.assertCellChar(1, 10, 'a')
+
 class VT100Tests_with_TopBottomMargins(VT100Tests):
 	# Rerun all the VT100 Tests inside restricted top and bottom margins
 	def setUp1(self):

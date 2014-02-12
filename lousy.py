@@ -595,6 +595,8 @@ class VT100(DumbTerminal):
 		# unknown modes.
 		if mode == '20':
 			self.linefeed_mode = value
+		elif mode == '7':
+			self.autowrap = value
 		elif mode == '6':
 			self.origin_relative = value
 
