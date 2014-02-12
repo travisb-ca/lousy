@@ -1439,6 +1439,40 @@ class VT100Tests(TerminalTestCase):
 		self.assertNotEqual(self.vty.current_col, firstTab)
 		self.assertEqual(self.vty.current_col, 2 * firstTab)
 
+	def test_setTabStop(self):
+		self.sendEsc('[3g')
+
+		self.placeCursor(0, 4)
+		self.sendEsc('H')
+
+		self.placeCursor(0, 12)
+		self.sendEsc('H')
+
+		self.placeCursor(0, 26)
+		self.sendEsc('H')
+
+		self.placeCursor(0, 73)
+		self.sendEsc('H')
+
+		self.placeCursor(0, 0)
+
+		self.assertEqual(self.vty.current_col, 0)
+
+		self.vty.interpret('\t')
+		self.assertEqual(self.vty.current_col, 4)
+
+		self.vty.interpret('\t')
+		self.assertEqual(self.vty.current_col, 12)
+
+		self.vty.interpret('\t')
+		self.assertEqual(self.vty.current_col, 26)
+
+		self.vty.interpret('\t')
+		self.assertEqual(self.vty.current_col, 73)
+
+		self.vty.interpret('\t')
+		self.assertEqual(self.vty.current_col, self.vty.cols - 1)
+
 class VT100Tests_with_TopBottomMargins(VT100Tests):
 	# Rerun all the VT100 Tests inside restricted top and bottom margins
 	def setUp1(self):

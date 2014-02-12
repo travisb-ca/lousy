@@ -435,6 +435,7 @@ class VT100(DumbTerminal):
 				'8': self.i_escape_restoreCursor,
 				'D': self.i_escape_cursorDown,
 				'E': self.i_escape_nextLine,
+				'H': self.i_escape_setTabStop,
 				'M': self.i_escape_cursorUp,
 				'#': self.i_escape_private,
 				}
@@ -556,6 +557,12 @@ class VT100(DumbTerminal):
 	def i_escape_nextLine(self, cell, c):
 		self.current_row += 1
 		self.current_col = 0
+		self.mode = 'normal'
+
+	def i_escape_setTabStop(self, cell, c):
+		self.tabstops.append(self.current_col)
+		self.tabstops.sort()
+
 		self.mode = 'normal'
 
 	def i_escape_private(self, cell, c):
