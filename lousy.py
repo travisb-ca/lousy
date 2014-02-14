@@ -93,27 +93,8 @@ class DumbTerminal(object):
 	modes = {} # Dictionary of dictionaries of methods to call
 	mode = 'normal'
 
-	rows = 24
-	cols = 80
-	tabstop = 8
-	margin_top = 0
-	margin_bottom = 23
-
-	# Should the text wrap to the next line when it reaches the end of
-	# the line automatically
-	autowrap = True
-
-	# Should the screen scroll automatically when entering the new line
-	# in the bottom-most line of the terminal
-	autoscroll = True
-
-	# Does a linefeed (\n) character move down one line (False) or down one
-	# line and back to the beginning of the line (True)?
-	linefeed_mode = False
-
 	def __init__(self):
-		self.current_row = 0
-		self.current_col = 0
+		self.initialSettings()
 
 		self.framebuffer = [[FrameBufferCell() for col in range(self.cols)] for row in range(self.rows)]
 
@@ -153,6 +134,27 @@ class DumbTerminal(object):
 				chr(0x1f): self.i_ignore,
 				chr(0x7f): self.i_ignore,
 				}
+
+	def initialSettings(self):
+		self.current_row = 0
+		self.current_col = 0
+		self.rows = 24
+		self.cols = 80
+		self.tabstop = 8
+		self.margin_top = 0
+		self.margin_bottom = 23
+
+		# Should the text wrap to the next line when it reaches the end of
+		# the line automatically
+		self.autowrap = True
+
+		# Should the screen scroll automatically when entering the new line
+		# in the bottom-most line of the terminal
+		self.autoscroll = True
+
+		# Does a linefeed (\n) character move down one line (False) or down one
+		# line and back to the beginning of the line (True)?
+		self.linefeed_mode = False
 
 	def dumpCell(self, cell):
 		'''Output a single cell with all it's formatting options set'''
@@ -305,11 +307,6 @@ class VT05(DumbTerminal):
 	'''
 
 	def __init__(self):
-		self.rows = 20
-		self.cols = 72
-
-		self.autowrap = False
-
 		DumbTerminal.__init__(self)
 
 		self.modes['normal'][chr(0x18)] = self.i_normal_cursorRight
@@ -323,6 +320,14 @@ class VT05(DumbTerminal):
 		self.modes['cad'] = {
 				'default': self.i_cad_address
 				}
+
+	def initialSettings(self):
+		DumbTerminal.initialSettings(self)
+
+		self.rows = 20
+		self.cols = 72
+
+		self.autowrap = False
 
 	def i_normal_cursorRight(self, cell, c):
 		if self.current_col < self.cols - 1:
@@ -402,28 +407,6 @@ class VT100(DumbTerminal):
 	'''VT100 terminal emulator'''
 
 	def __init__(self):
-		self.rows = 24
-		self.cols = 80
-		self.autowrap = False
-
-		# Do line number ignore the configured margins (False) or are
-		# they relative to the configured margins (True)
-		self.origin_relative = False
-
-		# Character attributes for characters as they come in
-		self.bold = False
-		self.underscore = False
-		self.blink = False
-		self.reverse = False
-		self.origin_row = 0
-		self.origin_col = 0
-
-		# Saved cursor info (if any)
-		self.saved = None
-
-		# The tabstops, default state it to have one every 8 chars. Stopping at the rightmost cell is implicit
-		self.tabstops = [i for i in range(0, self.cols, 8)]
-
 		DumbTerminal.__init__(self)
 
 		self.modes['normal'][chr(0x1b)] = self.i_normal_escape
@@ -431,6 +414,7 @@ class VT100(DumbTerminal):
 		self.modes['escape'] = {
 				'default': self.i_escape_exit,
 				'[': self.i_escape_csi,
+				'c': self.i_escape_reset,
 				'7': self.i_escape_saveCursor,
 				'8': self.i_escape_restoreCursor,
 				'D': self.i_escape_cursorDown,
@@ -515,6 +499,38 @@ class VT100(DumbTerminal):
 	def i_escape_csi(self, cell, c):
 		self.mode = 'csi'
 		self.csi_params = ''
+
+	def initialSettings(self):
+		DumbTerminal.initialSettings(self)
+
+		self.rows = 24
+		self.cols = 80
+		self.autowrap = False
+
+		# Do line number ignore the configured margins (False) or are
+		# they relative to the configured margins (True)
+		self.origin_relative = False
+
+		# Character attributes for characters as they come in
+		self.bold = False
+		self.underscore = False
+		self.blink = False
+		self.reverse = False
+		self.origin_row = 0
+		self.origin_col = 0
+
+		# Saved cursor info (if any)
+		self.saved = None
+
+		# The tabstops, default state it to have one every 8 chars.
+		# Stopping at the rightmost cell is implicit
+		self.tabstops = [i for i in range(0, self.cols, 8)]
+
+	def i_escape_reset(self, cell, c):
+		self.initialSettings()
+
+		self.mode = 'normal'
+
 
 	def i_escape_saveCursor(self, cell, c):
 		self.saved = {

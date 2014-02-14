@@ -1473,6 +1473,14 @@ class VT100Tests(TerminalTestCase):
 		self.vty.interpret('\t')
 		self.assertEqual(self.vty.current_col, self.vty.cols - 1)
 
+	def test_terminalReset(self):
+		self.placeCursor(11, 30)
+
+		self.sendEsc('c')
+
+		self.assertEqual(self.vty.current_row, 0)
+		self.assertEqual(self.vty.current_col, 0)
+
 class VT100Tests_with_TopBottomMargins(VT100Tests):
 	# Rerun all the VT100 Tests inside restricted top and bottom margins
 	def setUp1(self):
