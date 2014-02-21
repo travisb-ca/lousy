@@ -531,7 +531,6 @@ class VT100(DumbTerminal):
 
 		self.mode = 'normal'
 
-
 	def i_escape_saveCursor(self, cell, c):
 		self.saved = {
 				'bold'        : self.bold,
