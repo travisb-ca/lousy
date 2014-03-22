@@ -1,0 +1,47 @@
+Component: Test_Runner
+Date: 2014-03-22 22:23:37
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Blocker
+State: Open
+Title: Ctrl-C with process hangs
+Type: Bug
+Units_of_Work: 1000
+--
+Seen while working on Tachyon. The tests where running, I hit ctrl-c to cancel. The following traceback happened and then Lousy hung. It didn't seem to be using any CPU time.
+
+Traceback (most recent call last):
+  File "/Users/travis/bin/lousy", line 1937, in <module>
+    result = args.func(args)
+  File "/Users/travis/bin/lousy", line 1910, in cmd_run
+    runner.run(tests)
+  File "/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/unittest/runner.py", line 151, in run
+    test(result)
+  File "/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/unittest/suite.py", line 70, in __call__
+    return self.run(*args, **kwds)
+  File "/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/unittest/suite.py", line 108, in run
+    test(result)
+  File "/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/unittest/case.py", line 391, in __call__
+    return self.run(*args, **kwds)
+  File "/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/unittest/case.py", line 327, in run
+    testMethod()
+  File "/Users/travis/projects/tachyon/trunk/tests/component/terminal.py", line 544, in test_csiClearLine_default
+    self.assertVtyCharIs(10, i, c)
+  File "/Users/travis/projects/tachyon/trunk/tests/tachyon.py", line 40, in assertVtyCharIs
+    self.syncOutput()
+  File "/Users/travis/projects/tachyon/trunk/tests/tachyon.py", line 105, in syncOutput
+    self.tachyon.flushOutput()
+  File "/Users/travis/projects/lousy/trunk/lousy.py", line 1147, in flushOutput
+    while self.stdout.read() != '':
+  File "/Users/travis/projects/lousy/trunk/lousy.py", line 991, in read
+    ready, _, _ = select.select([self.pipes[self._fileno]], [], [], timeout)
+KeyboardInterrupt
+^C
+^C^C^C
