@@ -159,70 +159,74 @@ class DumbTerminal(object):
 	def dumpCell(self, cell):
 		'''Output a single cell with all it's formatting options set'''
 		if cell.char == '':
-			sys.stdout.write(' ')
+			return ' '
 		elif cell.char == '\t':
-			sys.stdout.write(' ')
+			return ' '
 		else:
-			sys.stdout.write(cell.char)
+			return cell.char
 
 	def dumpFrameBuffer(self):
 		'''Print out the characters of the framebuffer as it stands. Note that this is
 		   only an approximation as blank cells are written as spaces.
 		'''
+		s = ''
+
 		# Tens digit of column
-		sys.stdout.write('\n   ')
+		s += '\n   '
 		for col in range(self.cols):
 			if col % 10 == 0 and col > 0:
-				sys.stdout.write('%s' % str((col / 10) % 10))
+				s += '%s' % str((col / 10) % 10)
 			else:
-				sys.stdout.write(' ')
+				s += ' '
 
 		# Ones digit of column
-		sys.stdout.write('\n   ')
+		s += '\n   '
 		for col in range(self.cols):
-			sys.stdout.write('%s' % str(col % 10))
+			s += '%s' % str(col % 10)
 
 		# Top containment line
-		sys.stdout.write('\n  +')
+		s += '\n  +'
 		for col in range(self.cols):
-			sys.stdout.write('-')
-		sys.stdout.write('+\n')
+			s += '-'
+		s += '+\n'
 
 		for row in range(self.rows):
 			# Row number
 			if row % 10 == 0 and row != 0:
-				sys.stdout.write('%s|' % str(row % 100))
+				s += '%s|' % str(row % 100)
 			else:
-				sys.stdout.write(' %s|' % str(row % 10))
+				s += ' %s|' % str(row % 10)
 
 			for col in range(self.cols):
 				cell = self.cell(row, col)
-				self.dumpCell(cell)
+				s += self.dumpCell(cell)
 
 			# Row number
 			if row % 10 == 0 and row != 0:
-				sys.stdout.write('|%s\n' % str(row % 100))
+				s += '|%s\n' % str(row % 100)
 			else:
-				sys.stdout.write('| %s\n' % str(row % 10))
+				s += '| %s\n' % str(row % 10)
 		# Bottom containment line
-		sys.stdout.write('  +')
+		s += '  +'
 		for col in range(self.cols):
-			sys.stdout.write('-')
-		sys.stdout.write('+\n')
+			s += '-'
+		s += '+\n'
 
 		# Tens digits of column
-		sys.stdout.write('   ')
+		s += '   '
 		for col in range(self.cols):
 			if col % 10 == 0 and col > 0:
-				sys.stdout.write('%s' % str((col / 10) % 10))
+				s += '%s' % str((col / 10) % 10)
 			else:
-				sys.stdout.write(' ')
+				s += ' '
 
 		# Ones digit of column
-		sys.stdout.write('\n   ')
+		s += '\n   '
 		for col in range(self.cols):
-			sys.stdout.write('%s' % str(col % 10))
-		sys.stdout.write('\n')
+			s += '%s' % str(col % 10)
+		s += '\n'
+
+		sys.stdout.write(s)
 
 	def cell(self, row, col):
 		'''Retreive the FrameBufferCell for the given location. Returns None if the cell is out of range.
@@ -468,8 +472,9 @@ class VT100(DumbTerminal):
 		return self.cols - 1
 
 	def dumpCell(self, cell):
+		s = ''
 		def escWrite(s):
-			sys.stdout.write(chr(0x1b) + s)
+			return chr(0x1b) + s
 
 		attributes = []
 		if FrameBufferCell.BOLD in cell.attributes:
@@ -482,12 +487,14 @@ class VT100(DumbTerminal):
 			attributes.append('7')
 
 		# enable attributes
-		escWrite('[%sm' % ';'.join(attributes))
+		s += escWrite('[%sm' % ';'.join(attributes))
 
-		DumbTerminal.dumpCell(self, cell)
+		s += DumbTerminal.dumpCell(self, cell)
 
 		# reset all attributes
-		escWrite('[0m')
+		s += escWrite('[0m')
+
+		return s
 
 	def i_normal_escape(self, cell, c):
 		# Start an escape sequence
