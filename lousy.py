@@ -1143,7 +1143,7 @@ class Process(object):
 		return True
 
 	def flushOutput(self):
-		'''Wait until al the output from the process has been read and then return'''
+		'''Wait until all the output from the process has been read and then return'''
 		while self.stdout.read() != '':
 			pass
 
