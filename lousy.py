@@ -1245,12 +1245,14 @@ class Stub(asyncore.dispatcher):
 	in_buf = None
 	out_buf = None
 	read_ready = None # Is there data to be read
+	write_done = None # There is no more data to write
 	lock = None
 	_disconnect = False
 
 	def __init__(self, sock=None, map=None):
 		asyncore.dispatcher.__init__(self, sock, map)
 		self.read_ready = threading.Event()
+		self.write_done = threading.Event()
 		self.lock = threading.Lock()
 		self.in_buf = []
 		self.out_buf = []
@@ -1263,7 +1265,9 @@ class Stub(asyncore.dispatcher):
 				self.del_channel()
 				self.close()
 
+			self.write_done.set()
 			return False
+
 	def readable(self):
 		return not self._disconnect
 
@@ -1344,7 +1348,13 @@ class Stub(asyncore.dispatcher):
 		if _debug:
 			print 'Stub adding message to write queue "%s"' % msg
 		self.out_buf.append(msg)
+		self.write_done.clear()
 		self.stubcentral.trigger()
+
+	def flush(self, timeout=5):
+		'''Wait until the write queue is empty or the timeout has elapsed.
+		'''
+		self.write_done.wait(timeout)
 
 class SimpleStub(Stub):
 	'''This is a Stub which acts as a dumb, asynchrounous datapipe. 
