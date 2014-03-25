@@ -487,12 +487,14 @@ class VT100(DumbTerminal):
 			attributes.append('7')
 
 		# enable attributes
-		s += escWrite('[%sm' % ';'.join(attributes))
+		if sys.stdout.isatty():
+			s += escWrite('[%sm' % ';'.join(attributes))
 
 		s += DumbTerminal.dumpCell(self, cell)
 
 		# reset all attributes
-		s += escWrite('[0m')
+		if sys.stdout.isatty():
+			s += escWrite('[0m')
 
 		return s
 
