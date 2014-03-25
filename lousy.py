@@ -33,6 +33,7 @@ import socket
 import struct
 import importlib
 import traceback
+import math
 import pprint
 
 DEFAULT_PORT = 12345
@@ -1824,6 +1825,35 @@ if __name__ == '__main__':
 				still_running = self._running
 				self._lock.release()
 
+	# A little class which wraps a file and prepends the date and time to every line.
+	class DatedFileWrapper(object):
+		date_format = '%Y-%m-%d %H:%M:%S%%s | '
+
+		def __init__(self, file):
+			self.fd = file
+
+		def _get_time(self):
+			now = time.time()
+			t = time.localtime(now)
+			s = time.strftime(self.date_format, t)
+
+			# Apply the factional seconds
+			fractional_secs = math.modf(now)[0]
+			fractional_secs = '%f' % fractional_secs
+			fractional_secs = fractional_secs.lstrip('0')
+
+			s = s % fractional_secs
+
+			return s
+
+		def write(self, s):
+			if s != '\n':
+				self.fd.write(self._get_time())
+			self.fd.write(s)
+
+		def __getattr__(self, name):
+			return getattr(self.fd, name)
+
 	# Given a TestSuite of TestSuits of TestClasses, return a list of only those tests whose ID
 	# matches the given regex.
 	#
@@ -1880,6 +1910,8 @@ if __name__ == '__main__':
 		unittest._lousy_debug = args.debug
 		global _debug
 		_debug = args.debug
+
+		sys.stdout = DatedFileWrapper(sys.stdout)
 
 		if stubs is None:
 			# This instance is run as a script, so ensure that
