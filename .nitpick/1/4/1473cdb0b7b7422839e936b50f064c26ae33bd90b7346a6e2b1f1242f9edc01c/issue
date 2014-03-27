@@ -1,0 +1,20 @@
+Component: Test_Runner
+Date: 2014-03-27 03:50:09
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Eventually
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Minor
+State: Open
+Title: Timestamp each line of framebuffer dump
+Type: Feature
+Units_of_Work: 1000
+--
+Currently most lines are prepended with a timestamp when being output. This doesn't work for multi-line strings which are output at one go, only the first line has the time prepended. This makes the logs look a bit funny and difficult to just cut out the leading columns if they aren't wanted.
+
+It should be easy enough to look for newlines and insert a copy of the current timestamp there. This would timestamp all the lines of a framebuffer dump individually.
