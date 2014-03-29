@@ -1,0 +1,18 @@
+Component: Vtty
+Date: 2014-03-29 06:37:34
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Blocker
+State: Open
+Title: Framebuffers should be printable
+Type: Bug
+Units_of_Work: 1000
+--
+Currently the Framebuffer is just a dumb object which you can't print and appear at the properly formatted representation. This is unnecessarily limiting and should be remedied.
