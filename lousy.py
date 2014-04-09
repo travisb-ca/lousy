@@ -79,7 +79,7 @@ class FrameBufferCell(object):
 		return not self.__eq__(other)
 
 	def __str__(self):
-		return '%s' % _escapeAscii(self.char)
+		return '%s(%s)' % (_escapeAscii(self.char), self.attributes)
 
 class FrameBuffer(object):
 	'''Opaque class to contain a framebuffer snapshot'''
