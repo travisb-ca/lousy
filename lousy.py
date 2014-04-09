@@ -1276,7 +1276,7 @@ class Stub(asyncore.dispatcher):
 				return
 
 		if _debug:
-			print 'Stub sending message "%s"' % self.out_buf[0]
+			print 'Stub sending message "%s"' % _escapeAscii(self.out_buf[0])
 
 		self.send(struct.pack(MSG_HEADER_FMT, len(self.out_buf[0])))
 		bytes_sent = self.send(self.out_buf[0])
@@ -1346,7 +1346,7 @@ class Stub(asyncore.dispatcher):
 		as soon as possible.
 		'''
 		if _debug:
-			print 'Stub adding message to write queue "%s"' % msg
+			print 'Stub adding message to write queue "%s"' % _escapeAscii(msg)
 		self.out_buf.append(msg)
 		self.write_done.clear()
 		self.stubcentral.trigger()
