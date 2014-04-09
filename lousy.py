@@ -912,13 +912,13 @@ class Vtty(object):
 		'''Returns the number of rows in the virtual terminal'''
 		return self.emulation.rows
 
-	def snapShotScreen(self):
+	def snapShotScreen(self, forcePrint=False):
 		'''Returns an opaque object which is a snapshot of the virtual
 		   screen contents. This object can be compared with other
 		   snapshots, but will not contain the terminal state (such as
 		   in progress state changes).
 		'''
-		if _debug:
+		if _debug or forcePrint:
 			self.emulation.dumpFrameBuffer()
 		return FrameBuffer(copy.deepcopy(self.emulation.framebuffer))
 
