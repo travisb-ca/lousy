@@ -1090,7 +1090,7 @@ class Process(object):
 		   to be interpretted by the shell.
 		'''
 
-		if pty == True or type(pty) == type(''):
+		if pty == True or type(pty) == type('string'):
 			self.stdin = PtyProcessPipe()
 			self.stdout = self.stdin
 			self.stderr = self.stdin
