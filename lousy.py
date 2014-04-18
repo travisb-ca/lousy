@@ -34,6 +34,7 @@ import struct
 import importlib
 import traceback
 import math
+import termios
 import pprint
 
 DEFAULT_PORT = 12345
@@ -1064,14 +1065,20 @@ class PtyProcessPipe(ProcessPipe):
 	_direction = 1
 	_fileno = 0
 
-	def __init__(self):
+	def __init__(self, rows=24, cols=80):
 		self.pipes = os.openpty()
+		self._setTtySize(self.pipes[0], rows, cols)
 		self._setCloseExec(self.pipes[0])
+
+	def _setTtySize(self, fd, rows, cols):
+		# pack a struct winsize
+		arg = struct.pack('@HHHH', rows, cols, 0, 0)
+		fcntl.ioctl(fd, termios.TIOCSWINSZ, arg)
 
 class Process(object):
 	'''Class for interacting with processes'''
 
-	def __init__(self, command, shell=False, pty=False):
+	def __init__(self, command, shell=False, pty=False, ptySize=(24, 80)):
 		'''command a list of the command and then arguments to run as the process
 		   shell is True if the command should be run in the shell and False otherwise.
 		   pty is whether to use a pty or a normal pipe to communicate with the process.
@@ -1086,12 +1093,15 @@ class Process(object):
 		     True  - Start process in pty using default terminal emulation
 		     vt100 - Start process in pty using vt100 emulation
 
+		   ptySize is the tuple (rows, cols) for the size of the newly created pty.
+		   Defaults to (24, 80).
+
 		   If shell is True then the command list is converted into a space separate string
 		   to be interpretted by the shell.
 		'''
 
 		if pty == True or type(pty) == type('string'):
-			self.stdin = PtyProcessPipe()
+			self.stdin = PtyProcessPipe(ptySize[0], ptySize[1])
 			self.stdout = self.stdin
 			self.stderr = self.stdin
 
