@@ -1513,3 +1513,25 @@ class VttyTests(TerminalTestCase):
 		t = self.vtty.string(0, 79, 30)
 		self.assertEqual(t, self.vtty.cell(0, 79).char)
 
+class TypicalTtyTests(TerminalTestCase):
+	'''Test the TypicalTty class'''
+	def setUp1(self):
+		self.vtty = lousy.Vtty('typical')
+
+	def tearDown1(self):
+		pass
+
+	def test_setIcon(self):
+		self.vtty.append('\033]1;this is the title\007')
+		self.assertEqual(self.vtty.emulation.window_title, '')
+		self.assertEqual(self.vtty.emulation.icon_name, 'this is the title')
+
+	def test_setWindow(self):
+		self.vtty.append('\033]2;this is the title\007')
+		self.assertEqual(self.vtty.emulation.window_title, 'this is the title')
+		self.assertEqual(self.vtty.emulation.icon_name, '')
+
+	def test_setIconAndWindow(self):
+		self.vtty.append('\033]0;this is the title\007')
+		self.assertEqual(self.vtty.emulation.window_title, 'this is the title')
+		self.assertEqual(self.vtty.emulation.icon_name, 'this is the title')

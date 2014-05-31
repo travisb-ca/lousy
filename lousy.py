@@ -849,6 +849,56 @@ class VT100(DumbTerminal):
 
 		self.mode = 'normal'
 
+class TypicalTty(VT100):
+	'''A pseudo-xterm terminal whic supports all the most common escape codes'''
+
+	def __init__(self):
+		VT100.__init__(self)
+
+		self.modes['escape'][']'] = self.i_escape_osc
+
+		self.modes['osc'] = {
+				'default' : self.i_osc_collectParams,
+				'\007': self.i_osc_process,
+				}
+
+	def initialSettings(self):
+		VT100.initialSettings(self)
+
+		self.window_title = ''
+		self.icon_name = ''
+
+	def i_escape_osc(self, cell, c):
+		self.mode = 'osc'
+		self.osc_params = ''
+
+	def i_osc_collectParams(self, cell, c):
+		self.osc_params += c
+
+	def i_osc_set_icon(self, args):
+		self.icon_name = args
+
+	def i_osc_set_window(self, args):
+		self.window_title = args
+
+	def i_osc_set_icon_and_window(self, args):
+		self.i_osc_set_icon(args)
+		self.i_osc_set_window(args)
+
+	def i_osc_process(self, cell, c):
+		cmds = {
+				'0': self.i_osc_set_icon_and_window,
+				'1': self.i_osc_set_icon,
+				'2': self.i_osc_set_window,
+				}
+
+		cmd, args = self.osc_params.split(';', 2)
+
+		if cmd in cmds:
+			cmds[cmd](args)
+		else:
+			print 'Unknown osc command %s' % cmd
+
 class Vtty(object):
 	'''Vtty is a terminal emulator which interprets the output of a process and keeps a
 	   virtual framebuffer which can be examined to confirm process output.
@@ -860,6 +910,7 @@ class Vtty(object):
 			'dumb': DumbTerminal,
 			'vt05': VT05,
 			'vt100': VT100,
+			'typical': TypicalTty,
 			}
 
 
@@ -869,6 +920,7 @@ class Vtty(object):
 		   dumb
 		   vt05
 		   vt100
+		   typical - supports all the common set of escape codes
 		'''
 		if emulation is True:
 			emulation = 'vt100'
