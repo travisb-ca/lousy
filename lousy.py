@@ -892,7 +892,7 @@ class TypicalTty(VT100):
 				'2': self.i_osc_set_window,
 				}
 
-		cmd, args = self.osc_params.split(';', 2)
+		cmd, args = self.osc_params.split(';', 1)
 
 		if cmd in cmds:
 			cmds[cmd](args)
