@@ -899,6 +899,8 @@ class TypicalTty(VT100):
 		else:
 			print 'Unknown osc command %s' % cmd
 
+		self.mode = 'normal'
+
 class Vtty(object):
 	'''Vtty is a terminal emulator which interprets the output of a process and keeps a
 	   virtual framebuffer which can be examined to confirm process output.
