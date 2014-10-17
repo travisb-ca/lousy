@@ -850,7 +850,7 @@ class VT100(DumbTerminal):
 		self.mode = 'normal'
 
 class TypicalTty(VT100):
-	'''A pseudo-xterm terminal whic supports all the most common escape codes'''
+	'''A pseudo-xterm terminal which supports all the most common escape codes'''
 
 	def __init__(self):
 		VT100.__init__(self)
