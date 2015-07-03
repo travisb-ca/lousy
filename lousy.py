@@ -1044,7 +1044,7 @@ class ProcessPipe(object):
 		if len(self.buffer) > 0:
 			timeout = 0.0
 		else:
-			timeout = 0.1
+			timeout = 0.05
 
 		ready, _, _ = select.select([self.pipes[self._fileno]], [], [], timeout)
 		if len(ready) == 0:
@@ -1203,7 +1203,6 @@ class Process(object):
 		while self.process.poll() is None:
 			if time.time() - startTime > timeout:
 				return False
-			time.sleep(0.1)
 			self.flushOutput()
 		self.running = False
 		self.returncode = self.process.returncode
